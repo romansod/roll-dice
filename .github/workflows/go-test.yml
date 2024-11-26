@@ -21,7 +21,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: 1.21  # Set your Go version here
+        go-version: 1.23.3  # Set your Go version here
 
     # Step 3: Install dependencies
     - name: Install dependencies
@@ -29,4 +29,4 @@ jobs:
 
     # Step 4: Run tests
     - name: Run tests
-      run: go test ./... -v
+      run: cd roll-dice && go test ./... -v
