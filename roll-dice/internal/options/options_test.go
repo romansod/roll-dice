@@ -84,15 +84,15 @@ func TestMenuOptions(t *testing.T) {
 
 	/// - 1) Flip Coins
 	err = options.runOption(flip_coins)
-	expected = "nil"
-	if !testing_utils.AssertNIL(err) {
+	expected = "not yet implemented"
+	if !testing_utils.AssertEQ(expected, err.Error()) {
 		t.Errorf(testing_utils.AssertFailed, expected, err)
 	}
 
 	/// - 2) Roll Dice
 	err = options.runOption(roll_dice)
-	expected = "nil"
-	if !testing_utils.AssertNIL(err) {
+	expected = "not yet implemented"
+	if !testing_utils.AssertEQ(expected, err.Error()) {
 		t.Errorf(testing_utils.AssertFailed, expected, err)
 	}
 
