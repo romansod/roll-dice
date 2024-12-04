@@ -6,9 +6,19 @@ import (
 	"github.com/romansod/roll-dice/internal/testing_utils"
 )
 
+/// PRNG for testing
+///
+/// Use these global variables and functions for managing
+/// a deterministic collection of hardcoded values to be
+/// injected in place of the random number generator
+
+// predetermined PRNG results
 var hardcoded_rng_nums []int
+
+// iterator through hardcoded_rng_nums
 var hardcoded_rng_num_i int = 0
 
+// Seed the deterministic slice of pregenerated rng results
 func initHardcodedRngNums(rng_nums []int) {
 	hardcoded_rng_nums, hardcoded_rng_num_i = rng_nums, 0
 }
@@ -27,13 +37,14 @@ func PRNG_for_testing(num_outcomes int) int {
 	return getNextHardcodedRngNum() % num_outcomes
 }
 
+/// Tests for probgen
+
 func TestPRNG_for_testing(t *testing.T) {
-	/**
-	 * This test demonstrates the use of the PRNG_for_testing
-	 * behavior for simulatin a series of deterministic rng events
-	 *
-	 * 6 coin flip test
-	 */
+	// This test demonstrates the use of the PRNG_for_testing
+	// behavior for simulatin a series of deterministic rng events
+	//
+	// - 6 coin flip test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		//numEvents: 6, NOT USED
@@ -78,12 +89,10 @@ func TestPRNG_for_testing(t *testing.T) {
 }
 
 func TestGetProbValue(t *testing.T) {
-	/**
-	 * This tests the probability to outcome
-	 * conversion
-	 *
-	 * 6 coin flip test
-	 */
+	// This tests the probability to outcome conversion
+	//
+	// - 6 coin flip test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
@@ -128,11 +137,10 @@ func TestGetProbValue(t *testing.T) {
 }
 
 func TestProduceEvent(t *testing.T) {
-	/**
-	 * This tests the production of probability events
-	 *
-	 * 6 coin flip test
-	 */
+	// This tests the production of probability events
+	//
+	// - 6 coin flip test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
@@ -161,11 +169,10 @@ func TestProduceEvent(t *testing.T) {
 }
 
 func TestConsumeEvent(t *testing.T) {
-	/**
-	 * This tests the consumption of probability events
-	 *
-	 * 6 coin flip test
-	 */
+	// This tests the consumption of probability events
+	//
+	// - 6 coin flip test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
@@ -190,12 +197,11 @@ func TestConsumeEvent(t *testing.T) {
 }
 
 func TestGrnProbEventCoinFlip(t *testing.T) {
-	/**
-	 * This tests the full production -> consumption of
-	 * probhen.ProbEvent.computeProbability
-	 *
-	 * 6 coin flip test
-	 */
+	// This tests the full production -> consumption of
+	// probhen.ProbEvent.computeProbability
+	//
+	// - 6 coin flip test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	coinFlip := ProbEvent{
 		numEvents: 6,
@@ -218,12 +224,11 @@ func TestGrnProbEventCoinFlip(t *testing.T) {
 }
 
 func TestGenProbEventRollDice(t *testing.T) {
-	/**
-	 * This tests the full production -> consumption of
-	 * probhen.ProbEvent.computeProbability
-	 *
-	 * 6 dice roll test
-	 */
+	// This tests the full production -> consumption of
+	// probhen.ProbEvent.computeProbability
+	//
+	// - 6 dice roll test
+
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	rollDice := ProbEvent{
 		numEvents: 6,
