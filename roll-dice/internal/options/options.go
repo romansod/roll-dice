@@ -33,9 +33,10 @@ const (
 /// Collection of Options
 
 type Options struct {
-	opts map[int]Opt
+	opts map[int]Opt // Map of menu options to Opt
 }
 
+// Print the menu options
 func (options Options) displayOptions() {
 	fmt.Print("\n\nPlease enter the option number\n\nRegistered Options:\n\n")
 	for i := 0; i < len(options.opts); i++ {
@@ -44,10 +45,9 @@ func (options Options) displayOptions() {
 	}
 }
 
-/**
- * Register all Options
- *   opts[optNum] = Opt{name: _, optNum: _}
- */
+// Register all Options
+//
+//	opts[optNum] = Opt{name: _, optNum: _}
 func (options *Options) registerOptions() {
 	options.opts = make(map[int]Opt)
 	options.opts[exit] = OptExit{name: "Exit", optNum: exit}
@@ -55,14 +55,14 @@ func (options *Options) registerOptions() {
 	options.opts[roll_dice] = OptRollDice{name: "Roll Dice", optNum: roll_dice}
 }
 
-/**
- * Process user input
- * params :
- *   stdin - holds user input
- * returns:
- *   menu  - option as number
- *   error - any error encountered by string to int conversion
- */
+// Process user input
+//
+//	Params
+//		stdin io.Reader : holds user input
+//
+//	Returns
+//		int   : option as number
+//		error : any error encountered by string to int conversion
 func (options Options) processInput(stdin io.Reader) (int, error) {
 	options.displayOptions()
 	scanner := bufio.NewScanner(stdin)
@@ -71,6 +71,12 @@ func (options Options) processInput(stdin io.Reader) (int, error) {
 	return strconv.Atoi(scanner.Text())
 }
 
+// Run the given Opt based on the opt number provided
+//
+//	Params
+//		opt int : the menu option dictating which Opt is run
+//	Returns
+//		error : any error encountered
 func (options Options) runOption(opt int) error {
 	opt_t, exists := options.opts[opt]
 	if exists {
@@ -83,9 +89,9 @@ func (options Options) runOption(opt int) error {
 /// - Base Opt type
 
 type Opt interface {
-	process() error
-	getName() string
-	getOptNum() int
+	process() error  // Setup and execute operation
+	getName() string // Retrieve the name of the operation
+	getOptNum() int  // Get the opt number
 }
 
 /// - 0) Exit
@@ -152,6 +158,8 @@ func (optRollDice OptRollDice) getOptNum() int {
 	return optRollDice.optNum
 }
 
+// Main driving function. Will continue to prompt user for input
+// until failure or user asks to exit
 func Menu() {
 	user_exit := false
 

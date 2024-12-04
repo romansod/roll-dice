@@ -19,22 +19,43 @@ var hardcoded_rng_nums []int
 var hardcoded_rng_num_i int = 0
 
 // Seed the deterministic slice of pregenerated rng results
+//
+// NOTE: this must be run at the beginning of tests using
+// PRNG_for_testing results
+//
+//	 Params
+//		 rng_nums []int : slice of deterministic rng results
 func initHardcodedRngNums(rng_nums []int) {
 	hardcoded_rng_nums, hardcoded_rng_num_i = rng_nums, 0
 }
 
+// Retrieve the deterministic pregenerated rng results at the
+// given index
+//
+//	 Params
+//		 pe ProbEvent : the probability event related to the rng results
+//		 index int    : the desired pregenerated rng result
+//	 Returns
+//		 string : specific event outcome
 func getSpecificEvent(pe ProbEvent, index int) string {
 	return pe.outcomes[hardcoded_rng_nums[index]%len(pe.outcomes)]
 }
 
-func getNextHardcodedRngNum() int {
+// Retrieve the next deterministic pregenerated rng result and
+// advance the iterator
+//
+//	 Returns
+//		 int : the current pregenerated rng result
+func getHardcodedRngNum() int {
 	next := hardcoded_rng_nums[hardcoded_rng_num_i]
 	hardcoded_rng_num_i++
 	return next
 }
 
+// The Psuedo Random Number Generator used for testing purposes
+// and injected into ProbGen prng
 func PRNG_for_testing(num_outcomes int) int {
-	return getNextHardcodedRngNum() % num_outcomes
+	return getHardcodedRngNum() % num_outcomes
 }
 
 /// Tests for probgen

@@ -7,6 +7,10 @@ import (
 	"github.com/romansod/roll-dice/internal/testing_utils"
 )
 
+// Initialize Options and registers them for use during tests
+//
+//	Returns
+//		options : the initialized and registered Options
 func setUp() Options {
 	options := Options{}
 	options.registerOptions()
@@ -15,6 +19,9 @@ func setUp() Options {
 }
 
 func TestDisplay(t *testing.T) {
+	// Tests the formatting of the commandline display
+	// This will likely need updates for every new feature
+
 	options := setUp()
 	origStdout, r, w := testing_utils.RedirectStdout()
 
@@ -34,6 +41,8 @@ func TestDisplay(t *testing.T) {
 }
 
 func TestProcessInput(t *testing.T) {
+	// Tests input processing for error and passing values
+
 	options := setUp()
 	origStdout, ignoreOut := testing_utils.IgnoreStdout()
 
@@ -63,12 +72,15 @@ func TestProcessInput(t *testing.T) {
 }
 
 func TestMenuOptions(t *testing.T) {
+	// Tests the selection of menu options
+	// This will likely need updates for every new feature
+
 	options := setUp()
 	origStdout, ignoreOut := testing_utils.IgnoreStdout()
 
 	expected := ""
 
-	/// - (-1) Unsupported Option
+	/// - -1) Unsupported Option
 	err := options.runOption(-1)
 	expected = "unsupported option"
 	if !testing_utils.AssertEQ(expected, err.Error()) {
