@@ -7,8 +7,14 @@ computation
 package probgen
 
 import (
+	"errors"
 	"math/rand"
 )
+
+/// Constants
+
+const ErrInvalidEvents = "invalid number of events: must be a positive integer"
+const ErrInvalidPossibilities = "invalid number of possibilities: must have at least one possible outcome"
 
 type ProbEvent struct {
 	numEvents int           // Number of probabilistic events
@@ -90,6 +96,7 @@ func randNumGen(num_outcomes int) int {
 //		table that is indexed by the possible outcomes
 //		and returns the number of times that outcome
 //		occurred
+//		error          : any errors encountered
 //
 //	Ex:
 //		events       : 3
@@ -100,7 +107,15 @@ func randNumGen(num_outcomes int) int {
 //		e3 : "heads"
 //
 //		returns : {"heads":2, "tails":1}
-func GenerateProbabilisticEvent(events int, possibilities []string) map[string]int {
+func GenerateProbabilisticEvent(events int, possibilities []string) (map[string]int, error) {
+	if events < 0 {
+		// Can not have negative events
+		return nil, errors.New(ErrInvalidEvents)
+	} else if len(possibilities) < 1 {
+		// Must have at least one possible outcome
+		return nil, errors.New(ErrInvalidPossibilities)
+	}
+
 	probEvent := ProbEvent{numEvents: events, outcomes: possibilities, prng: randNumGen}
-	return probEvent.computeProbability()
+	return probEvent.computeProbability(), nil
 }

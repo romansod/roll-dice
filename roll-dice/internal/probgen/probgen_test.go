@@ -217,6 +217,39 @@ func TestConsumeEvent(t *testing.T) {
 	}
 }
 
+func TestNegGenProbEvent(t *testing.T) {
+	// Tests that invalid input types are sufficiently handled
+
+	// Invalid number of events (negative)
+	_, err := GenerateProbabilisticEvent(-1, make([]string, 0))
+	expected, actual := ErrInvalidEvents, err.Error()
+	if !testing_utils.AssertEQ(expected, actual) {
+		t.Errorf(testing_utils.AssertFailed, expected, actual)
+	}
+
+	// Invalid possibilities (no possibilities given)
+	_, err = GenerateProbabilisticEvent(4, make([]string, 0))
+	expected, actual = ErrInvalidPossibilities, err.Error()
+	if !testing_utils.AssertEQ(expected, actual) {
+		t.Errorf(testing_utils.AssertFailed, expected, actual)
+	}
+
+}
+
+func TestPosGenProbEvent(t *testing.T) {
+	// Tests that valid inputs will not fail.
+	//
+	// NOTE: we do not check these results as they are not
+	// deterministic. Please see TestGrnProbEvent* tests
+	// which make the internal behavior deterministic
+	// exclusively for testing
+
+	_, err := GenerateProbabilisticEvent(4, []string{"heads", "tails"})
+	if !testing_utils.AssertNIL(err) {
+		t.Errorf(testing_utils.AssertFailed, "nil", err.Error())
+	}
+}
+
 func TestGrnProbEventCoinFlip(t *testing.T) {
 	// This tests the full production -> consumption of
 	// probhen.ProbEvent.computeProbability
