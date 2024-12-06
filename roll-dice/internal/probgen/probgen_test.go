@@ -74,39 +74,27 @@ func TestPRNG_for_testing(t *testing.T) {
 
 	// 0 -> 0
 	expected, actual := 0, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 3 -> 1
 	expected, actual = 1, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 5 -> 1
 	expected, actual = 1, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 22 -> 0
 	expected, actual = 0, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 7 -> 1
 	expected, actual = 1, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 4 -> 0
 	expected, actual = 0, pe.prng(len(pe.outcomes))
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 }
 
 func TestGetProbValue(t *testing.T) {
@@ -122,39 +110,27 @@ func TestGetProbValue(t *testing.T) {
 
 	// 0 -> heads
 	expected, actual := "heads", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// 3 -> tails
 	expected, actual = "tails", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// 5 -> tails
 	expected, actual = "tails", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// 22 -> heads
 	expected, actual = "heads", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// 7 -> tails
 	expected, actual = "tails", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// 4 -> heads
 	expected, actual = "heads", pe.getProbValue()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 }
 
 func TestProduceEvent(t *testing.T) {
@@ -176,17 +152,13 @@ func TestProduceEvent(t *testing.T) {
 
 	for event := range events {
 		expected, actual := getSpecificEvent(pe, num_e), event
-		if !testing_utils.AssertEQ(expected, actual) {
-			t.Errorf(testing_utils.AssertFailed, expected, actual)
-		}
+		testing_utils.AssertEQ(t, expected, actual)
 
 		num_e++
 	}
 
 	expected, actual := 6, num_e
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 }
 
 func TestConsumeEvent(t *testing.T) {
@@ -207,14 +179,10 @@ func TestConsumeEvent(t *testing.T) {
 	results := pe.consumeEvents(events)
 
 	expected, actual := 3, results["heads"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	expected, actual = 3, results["tails"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 }
 
 func TestNegGenProbEvent(t *testing.T) {
@@ -223,17 +191,12 @@ func TestNegGenProbEvent(t *testing.T) {
 	// Invalid number of events (negative)
 	_, err := GenerateProbabilisticEvent(-1, make([]string, 0))
 	expected, actual := ErrInvalidEvents, err.Error()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQ(t, expected, actual)
 
 	// Invalid possibilities (no possibilities given)
 	_, err = GenerateProbabilisticEvent(4, make([]string, 0))
 	expected, actual = ErrInvalidPossibilities, err.Error()
-	if !testing_utils.AssertEQ(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
-
+	testing_utils.AssertEQ(t, expected, actual)
 }
 
 func TestPosGenProbEvent(t *testing.T) {
@@ -245,9 +208,7 @@ func TestPosGenProbEvent(t *testing.T) {
 	// exclusively for testing
 
 	_, err := GenerateProbabilisticEvent(4, []string{"heads", "tails"})
-	if !testing_utils.AssertNIL(err) {
-		t.Errorf(testing_utils.AssertFailed, "nil", err.Error())
-	}
+	testing_utils.AssertNIL(t, err)
 }
 
 func TestGrnProbEventCoinFlip(t *testing.T) {
@@ -266,15 +227,11 @@ func TestGrnProbEventCoinFlip(t *testing.T) {
 
 	// 3, 5, 7 -> 3 x tails
 	expected, actual := 3, res["tails"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 1, 22, 4 -> 3 x tails
 	expected, actual = 3, res["heads"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 }
 
 func TestGenProbEventRollDice(t *testing.T) {
@@ -293,37 +250,25 @@ func TestGenProbEventRollDice(t *testing.T) {
 
 	// 0 -> 1 x 1
 	expected, actual := 1, res["1"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 7 -> 1 x 2
 	expected, actual = 1, res["2"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// No roll equivalent to 3 -> 0
 	expected, actual = 0, res["3"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 3 -> 1 x 4
 	expected, actual = 1, res["4"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 6, 22 -> 2 x 5
 	expected, actual = 2, res["5"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 
 	// 5 -> 1 x 6
 	expected, actual = 1, res["6"]
-	if !testing_utils.AssertEQi(expected, actual) {
-		t.Errorf(testing_utils.AssertFailed, expected, actual)
-	}
+	testing_utils.AssertEQi(t, expected, actual)
 }
