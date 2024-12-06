@@ -28,16 +28,14 @@ func TestDisplay(t *testing.T) {
 	expected := ""
 	options.displayOptions()
 
-	output := testing_utils.CaptureOutput(r, w, origStdout)
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	expected =
 		"\n\nPlease enter the option number" +
 			"\n\nRegistered Options:\n" +
 			"\n\t0) Exit" +
 			"\n\t1) Flip Coins" +
 			"\n\t2) Roll Dice\n"
-	if !testing_utils.AssertEQ(expected, output) {
-		t.Errorf(testing_utils.AssertFailed, expected, output)
-	}
+	testing_utils.AssertEQ(t, expected, output)
 }
 
 func TestProcessInput(t *testing.T) {
@@ -53,19 +51,14 @@ func TestProcessInput(t *testing.T) {
 	stdin.Write([]byte("invalid"))
 	expected = "strconv.Atoi: parsing \"invalid\": invalid syntax"
 	_, err := options.processInput(&stdin)
-	if !testing_utils.AssertEQ(expected, err.Error()) {
-		t.Errorf(testing_utils.AssertFailed, expected, err)
-	}
+	testing_utils.AssertEQ(t, expected, err.Error())
 	stdin.Reset()
 
 	// Pass : unsupported
 	stdin.Write([]byte("-1"))
 	input, err := options.processInput(&stdin)
-	if !testing_utils.AssertNIL(err) {
-		t.Errorf(testing_utils.AssertFailed, "nil", err)
-	} else if !testing_utils.AssertEQi(-1, input) {
-		t.Errorf(testing_utils.AssertFailed, -1, input)
-	}
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQi(t, -1, input)
 	stdin.Reset()
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
@@ -83,30 +76,22 @@ func TestMenuOptions(t *testing.T) {
 	/// - -1) Unsupported Option
 	err := options.runOption(-1)
 	expected = "unsupported option"
-	if !testing_utils.AssertEQ(expected, err.Error()) {
-		t.Errorf(testing_utils.AssertFailed, expected, err)
-	}
+	testing_utils.AssertEQ(t, expected, err.Error())
 
 	/// - 0) Exit
 	err = options.runOption(exit)
 	expected = "nil"
-	if !testing_utils.AssertNIL(err) {
-		t.Errorf(testing_utils.AssertFailed, expected, err)
-	}
+	testing_utils.AssertNIL(t, err)
 
 	/// - 1) Flip Coins
 	err = options.runOption(flip_coins)
 	expected = "not yet implemented"
-	if !testing_utils.AssertEQ(expected, err.Error()) {
-		t.Errorf(testing_utils.AssertFailed, expected, err)
-	}
+	testing_utils.AssertEQ(t, expected, err.Error())
 
 	/// - 2) Roll Dice
 	err = options.runOption(roll_dice)
 	expected = "not yet implemented"
-	if !testing_utils.AssertEQ(expected, err.Error()) {
-		t.Errorf(testing_utils.AssertFailed, expected, err)
-	}
+	testing_utils.AssertEQ(t, expected, err.Error())
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
 }
