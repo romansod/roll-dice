@@ -15,7 +15,12 @@ type CoinFlip struct {
 	NumEvents int // number of coin flips
 }
 
-func (coinFlip CoinFlip) Execute() error {
+func (coinFlip CoinFlip) validate() (bool, error) {
+	// Nothing to do as Heads and Tails are already implied
+	return true, nil
+}
+
+func (coinFlip CoinFlip) execute() error {
 	res, err := GenerateProbabilisticEvent(
 		coinFlip.NumEvents,
 		[]string{

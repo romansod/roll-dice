@@ -125,7 +125,8 @@ func (optFlipCoins OptFlipCoins) process() error {
 	}
 
 	coinFlip := probgen.CoinFlip{NumEvents: input}
-	return coinFlip.Execute()
+
+	return probgen.ValidateAndExecute(coinFlip)
 }
 
 func (optFlipCoins OptFlipCoins) getName() string {
@@ -144,7 +145,23 @@ type OptRollDice struct {
 }
 
 func (optRollDice OptRollDice) process() error {
-	return errors.New(ErrNotImplemented)
+	// Need the number of sides on the dice
+	fmt.Printf("Please select the number of dice sides %s:\n", probgen.ValidDiceTypes)
+	sides, err := processInput(os.Stdin)
+	if err != nil {
+		return errors.New(SyntaxErrExpectedInt)
+	}
+
+	// Need the number of rolls for the dice
+	fmt.Print("Please enter the number of dice rolls\n")
+	rolls, err := processInput(os.Stdin)
+	if err != nil {
+		return errors.New(SyntaxErrExpectedInt)
+	}
+
+	diceRoll := probgen.DiceRoll{NumEvents: rolls, NumSides: sides}
+
+	return probgen.ValidateAndExecute(diceRoll)
 }
 
 func (optRollDice OptRollDice) getName() string {
