@@ -40,8 +40,7 @@ func TestDisplay(t *testing.T) {
 
 func TestProcessInput(t *testing.T) {
 	// Tests input processing for error and passing values
-
-	options := setUp()
+	// Ignoring stdout helps with extra lines added to processInput
 	origStdout, ignoreOut := testing_utils.IgnoreStdout()
 
 	expected := ""
@@ -50,13 +49,13 @@ func TestProcessInput(t *testing.T) {
 	// Err : non-numeric
 	stdin.Write([]byte("invalid"))
 	expected = "strconv.Atoi: parsing \"invalid\": invalid syntax"
-	_, err := options.processInput(&stdin)
+	_, err := processInput(&stdin)
 	testing_utils.AssertEQ(t, expected, err.Error())
 	stdin.Reset()
 
 	// Pass : unsupported
 	stdin.Write([]byte("-1"))
-	input, err := options.processInput(&stdin)
+	input, err := processInput(&stdin)
 	testing_utils.AssertNIL(t, err)
 	testing_utils.AssertEQi(t, -1, input)
 	stdin.Reset()
@@ -75,7 +74,7 @@ func TestMenuOptions(t *testing.T) {
 
 	/// - -1) Unsupported Option
 	err := options.runOption(-1)
-	expected = "unsupported option"
+	expected = ErrUnsupported
 	testing_utils.AssertEQ(t, expected, err.Error())
 
 	/// - 0) Exit
@@ -85,12 +84,12 @@ func TestMenuOptions(t *testing.T) {
 
 	/// - 1) Flip Coins
 	err = options.runOption(flip_coins)
-	expected = "not yet implemented"
+	expected = SyntaxErrExpectedInt
 	testing_utils.AssertEQ(t, expected, err.Error())
 
 	/// - 2) Roll Dice
 	err = options.runOption(roll_dice)
-	expected = "not yet implemented"
+	expected = ErrNotImplemented
 	testing_utils.AssertEQ(t, expected, err.Error())
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
