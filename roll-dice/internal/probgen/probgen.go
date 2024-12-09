@@ -13,7 +13,7 @@ import (
 
 /// Constants
 
-const ErrInvalidEvents = "invalid number of events: must be a positive integer"
+const ErrInvalidEvents = "invalid number of events: must be more than one event"
 const ErrInvalidPossibilities = "invalid number of possibilities: must have at least one possible outcome"
 
 type ProbEvent struct {
@@ -108,8 +108,7 @@ func randNumGen(num_outcomes int) int {
 //
 //		returns : {"heads":2, "tails":1}
 func GenerateProbabilisticEvent(events int, possibilities []string) (map[string]int, error) {
-	if events < 0 {
-		// Can not have negative events
+	if events < 1 {
 		return nil, errors.New(ErrInvalidEvents)
 	} else if len(possibilities) < 1 {
 		// Must have at least one possible outcome
@@ -118,4 +117,19 @@ func GenerateProbabilisticEvent(events int, possibilities []string) (map[string]
 
 	probEvent := ProbEvent{numEvents: events, outcomes: possibilities, prng: randNumGen}
 	return probEvent.computeProbability(), nil
+}
+
+// ProbEvent interface for use in options
+type ProbEventType interface {
+	Execute()               // Compute and display result
+	display(map[string]int) // Display results
+}
+
+// Utility to compute the percent: numerator / denominator
+//
+//	Params
+//		numerator int   : divided by denominator
+//		denominator int : divides numerator
+func Percent(numerator int, denominator int) float32 {
+	return float32(numerator) * 100 / float32(denominator)
 }

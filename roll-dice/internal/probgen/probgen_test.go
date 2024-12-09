@@ -69,7 +69,7 @@ func TestPRNG_for_testing(t *testing.T) {
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		//numEvents: 6, NOT USED
-		outcomes: []string{"heads", "tails"},
+		outcomes: []string{Heads, Tails},
 		prng:     PRNG_for_testing}
 
 	// 0 -> 0
@@ -105,31 +105,31 @@ func TestGetProbValue(t *testing.T) {
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
-		outcomes:  []string{"heads", "tails"},
+		outcomes:  []string{Heads, Tails},
 		prng:      PRNG_for_testing}
 
 	// 0 -> heads
-	expected, actual := "heads", pe.getProbValue()
+	expected, actual := Heads, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 3 -> tails
-	expected, actual = "tails", pe.getProbValue()
+	expected, actual = Tails, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 5 -> tails
-	expected, actual = "tails", pe.getProbValue()
+	expected, actual = Tails, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 22 -> heads
-	expected, actual = "heads", pe.getProbValue()
+	expected, actual = Heads, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 7 -> tails
-	expected, actual = "tails", pe.getProbValue()
+	expected, actual = Tails, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 4 -> heads
-	expected, actual = "heads", pe.getProbValue()
+	expected, actual = Heads, pe.getProbValue()
 	testing_utils.AssertEQ(t, expected, actual)
 }
 
@@ -141,7 +141,7 @@ func TestProduceEvent(t *testing.T) {
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
-		outcomes:  []string{"heads", "tails"},
+		outcomes:  []string{Heads, Tails},
 		prng:      PRNG_for_testing}
 
 	events := make(chan string)
@@ -169,7 +169,7 @@ func TestConsumeEvent(t *testing.T) {
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	pe := ProbEvent{
 		numEvents: 6,
-		outcomes:  []string{"heads", "tails"},
+		outcomes:  []string{Heads, Tails},
 		prng:      PRNG_for_testing}
 
 	events := make(chan string)
@@ -178,10 +178,10 @@ func TestConsumeEvent(t *testing.T) {
 
 	results := pe.consumeEvents(events)
 
-	expected, actual := 3, results["heads"]
+	expected, actual := 3, results[Heads]
 	testing_utils.AssertEQi(t, expected, actual)
 
-	expected, actual = 3, results["tails"]
+	expected, actual = 3, results[Tails]
 	testing_utils.AssertEQi(t, expected, actual)
 }
 
@@ -191,6 +191,11 @@ func TestNegGenProbEvent(t *testing.T) {
 	// Invalid number of events (negative)
 	_, err := GenerateProbabilisticEvent(-1, make([]string, 0))
 	expected, actual := ErrInvalidEvents, err.Error()
+	testing_utils.AssertEQ(t, expected, actual)
+
+	// Invalid number of events (zero)
+	_, err = GenerateProbabilisticEvent(0, make([]string, 0))
+	expected, actual = ErrInvalidEvents, err.Error()
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// Invalid possibilities (no possibilities given)
@@ -207,7 +212,7 @@ func TestPosGenProbEvent(t *testing.T) {
 	// which make the internal behavior deterministic
 	// exclusively for testing
 
-	_, err := GenerateProbabilisticEvent(4, []string{"heads", "tails"})
+	_, err := GenerateProbabilisticEvent(4, []string{Heads, Tails})
 	testing_utils.AssertNIL(t, err)
 }
 
@@ -220,17 +225,17 @@ func TestGrnProbEventCoinFlip(t *testing.T) {
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
 	coinFlip := ProbEvent{
 		numEvents: 6,
-		outcomes:  []string{"heads", "tails"},
+		outcomes:  []string{Heads, Tails},
 		prng:      PRNG_for_testing}
 
 	res := coinFlip.computeProbability()
 
 	// 3, 5, 7 -> 3 x tails
-	expected, actual := 3, res["tails"]
+	expected, actual := 3, res[Tails]
 	testing_utils.AssertEQi(t, expected, actual)
 
 	// 1, 22, 4 -> 3 x tails
-	expected, actual = 3, res["heads"]
+	expected, actual = 3, res[Heads]
 	testing_utils.AssertEQi(t, expected, actual)
 }
 
@@ -271,4 +276,54 @@ func TestGenProbEventRollDice(t *testing.T) {
 	// 5 -> 1 x 6
 	expected, actual = 1, res["6"]
 	testing_utils.AssertEQi(t, expected, actual)
+}
+
+func TestGenProbDisplays(t *testing.T) {
+	// Test the display functions of ProbEventTypes
+
+	// CoinFlip
+	origStdout, r, w := testing_utils.RedirectStdout()
+	// 1) Flip just one coin, make sure percent is formatted
+	coinFlip := CoinFlip{NumEvents: 1}
+	coinFlip.display(
+		map[string]int{
+			Heads: 1,
+			Tails: 0,
+		})
+
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected :=
+		"(H) : 100.000000% : 1\n" +
+			"(T) :   0.000000% : 0\n"
+	testing_utils.AssertEQ(t, expected, output)
+
+	// 2) Small scale should have round numbers
+	origStdout, r, w = testing_utils.RedirectStdout()
+	coinFlip = CoinFlip{NumEvents: 10}
+	coinFlip.display(
+		map[string]int{
+			Heads: 4,
+			Tails: 6,
+		})
+
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected =
+		"(H) :  40.000000% : 4\n" +
+			"(T) :  60.000000% : 6\n"
+	testing_utils.AssertEQ(t, expected, output)
+
+	// 3) Large scale, non round should handle large values
+	origStdout, r, w = testing_utils.RedirectStdout()
+	coinFlip = CoinFlip{NumEvents: 1000005}
+	coinFlip.display(
+		map[string]int{
+			Heads: 499761,
+			Tails: 500244,
+		})
+
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected =
+		"(H) :  49.975849% : 499761\n" +
+			"(T) :  50.024151% : 500244\n"
+	testing_utils.AssertEQ(t, expected, output)
 }

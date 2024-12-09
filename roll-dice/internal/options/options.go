@@ -15,12 +15,16 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/romansod/roll-dice/internal/probgen"
 )
 
 /// Constants
 
 const ErrUnsupported = "unsupported option"
 const ErrNotImplemented = "not yet implemented"
+
+const SyntaxErrExpectedInt = "syntax error: expected integer"
 
 /// Option Types
 
@@ -53,22 +57,6 @@ func (options *Options) registerOptions() {
 	options.opts[exit] = OptExit{name: "Exit", optNum: exit}
 	options.opts[flip_coins] = OptFlipCoins{name: "Flip Coins", optNum: flip_coins}
 	options.opts[roll_dice] = OptRollDice{name: "Roll Dice", optNum: roll_dice}
-}
-
-// Process user input
-//
-//	Params
-//		stdin io.Reader : holds user input
-//
-//	Returns
-//		int   : option as number
-//		error : any error encountered by string to int conversion
-func (options Options) processInput(stdin io.Reader) (int, error) {
-	options.displayOptions()
-	scanner := bufio.NewScanner(stdin)
-	scanner.Scan()
-	fmt.Print("\n")
-	return strconv.Atoi(scanner.Text())
 }
 
 // Run the given Opt based on the opt number provided
@@ -128,7 +116,16 @@ type OptFlipCoins struct {
 }
 
 func (optFlipCoins OptFlipCoins) process() error {
-	return errors.New(ErrNotImplemented)
+	// Only need the number of coin flips, the possible
+	// outcomes are already known
+	fmt.Print("Please enter the number of coin flips\n")
+	input, err := processInput(os.Stdin)
+	if err != nil {
+		return errors.New(SyntaxErrExpectedInt)
+	}
+
+	coinFlip := probgen.CoinFlip{NumEvents: input}
+	return coinFlip.Execute()
 }
 
 func (optFlipCoins OptFlipCoins) getName() string {
@@ -158,6 +155,22 @@ func (optRollDice OptRollDice) getOptNum() int {
 	return optRollDice.optNum
 }
 
+// Process user input
+//
+//	Params
+//		stdin io.Reader : holds user input
+//
+//	Returns
+//		int   : option as number
+//		error : any error encountered by string to int conversion
+func processInput(stdin io.Reader) (int, error) {
+	scanner := bufio.NewScanner(stdin)
+	scanner.Scan()
+	// Add extra space after input to avoid clutter
+	fmt.Print("\n")
+	return strconv.Atoi(scanner.Text())
+}
+
 // Main driving function. Will continue to prompt user for input
 // until failure or user asks to exit
 func Menu() {
@@ -168,9 +181,10 @@ func Menu() {
 
 	for !user_exit {
 		// User input for menu option parsed
-		input, err := menu_options.processInput(os.Stdin)
+		menu_options.displayOptions()
+		input, err := processInput(os.Stdin)
 		if err != nil {
-			fmt.Print("Syntax Error: Expected Integer\n")
+			fmt.Print(SyntaxErrExpectedInt)
 			continue
 		}
 
