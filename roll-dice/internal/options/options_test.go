@@ -89,7 +89,7 @@ func TestMenuOptions(t *testing.T) {
 
 	/// - 2) Roll Dice
 	err = options.runOption(roll_dice)
-	expected = ErrNotImplemented
+	expected = SyntaxErrExpectedInt
 	testing_utils.AssertEQ(t, expected, err.Error())
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)

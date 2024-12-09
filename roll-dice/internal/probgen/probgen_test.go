@@ -278,7 +278,7 @@ func TestGenProbEventRollDice(t *testing.T) {
 	testing_utils.AssertEQi(t, expected, actual)
 }
 
-func TestGenProbDisplays(t *testing.T) {
+func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	// Test the display functions of ProbEventTypes
 
 	// CoinFlip
@@ -325,5 +325,108 @@ func TestGenProbDisplays(t *testing.T) {
 	expected =
 		"(H) :  49.975849% : 499761\n" +
 			"(T) :  50.024151% : 500244\n"
+	testing_utils.AssertEQ(t, expected, output)
+}
+
+func TestValidDiceType(t *testing.T) {
+	// Test the validation of dice types
+
+	// Invalid dice types
+	testing_utils.AssertEQb(t, false, validDiceType(0))
+	testing_utils.AssertEQb(t, false, validDiceType(1))
+	testing_utils.AssertEQb(t, false, validDiceType(3))
+	testing_utils.AssertEQb(t, false, validDiceType(5))
+	testing_utils.AssertEQb(t, false, validDiceType(8))
+	testing_utils.AssertEQb(t, false, validDiceType(11))
+	testing_utils.AssertEQb(t, false, validDiceType(13))
+	testing_utils.AssertEQb(t, false, validDiceType(19))
+	testing_utils.AssertEQb(t, false, validDiceType(21))
+
+	// Valid dice types
+	testing_utils.AssertEQb(t, true, validDiceType(D4))
+	testing_utils.AssertEQb(t, true, validDiceType(D6))
+	testing_utils.AssertEQb(t, true, validDiceType(D10))
+	testing_utils.AssertEQb(t, true, validDiceType(D12))
+	testing_utils.AssertEQb(t, true, validDiceType(D20))
+}
+func TestGenProbDisplaysDiceRoll(t *testing.T) {
+	// Test the display functions of ProbEventTypes
+
+	// DiceRoll
+	origStdout, r, w := testing_utils.RedirectStdout()
+	// 1) Flip just one coin, make sure percent is formatted
+	diceRoll := DiceRoll{NumEvents: 1, NumSides: D6}
+	diceRoll.display(
+		map[string]int{
+			"1": 1,
+			"2": 0,
+			"3": 0,
+			"4": 0,
+			"5": 0,
+			"6": 0,
+		})
+
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected :=
+		"[1]  : 100.000000% : 1\n" +
+			"[2]  :   0.000000% : 0\n" +
+			"[3]  :   0.000000% : 0\n" +
+			"[4]  :   0.000000% : 0\n" +
+			"[5]  :   0.000000% : 0\n" +
+			"[6]  :   0.000000% : 0\n"
+	testing_utils.AssertEQ(t, expected, output)
+
+	// 2) Small scale should have round numbers
+	origStdout, r, w = testing_utils.RedirectStdout()
+	diceRoll = DiceRoll{NumEvents: 10, NumSides: D12}
+	diceRoll.display(
+		map[string]int{
+			"1":  2,
+			"2":  0,
+			"3":  4,
+			"4":  0,
+			"5":  2,
+			"6":  0,
+			"7":  1,
+			"8":  0,
+			"9":  0,
+			"10": 0,
+			"11": 1,
+			"12": 1,
+		})
+
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected =
+		"[1]  :  20.000000% : 2\n" +
+			"[2]  :   0.000000% : 0\n" +
+			"[3]  :  40.000000% : 4\n" +
+			"[4]  :   0.000000% : 0\n" +
+			"[5]  :  20.000000% : 2\n" +
+			"[6]  :   0.000000% : 0\n" +
+			"[7]  :  10.000000% : 1\n" +
+			"[8]  :   0.000000% : 0\n" +
+			"[9]  :   0.000000% : 0\n" +
+			"[10] :   0.000000% : 0\n" +
+			"[11] :  10.000000% : 1\n" +
+			"[12] :  10.000000% : 1\n"
+	testing_utils.AssertEQ(t, expected, output)
+
+	// 3) Large scale, non round should handle large values
+	origStdout, r, w = testing_utils.RedirectStdout()
+	diceRoll = DiceRoll{NumEvents: 1000005, NumSides: D4}
+	diceRoll.display(
+		map[string]int{
+			"1": 250065,
+			"2": 249826,
+			"3": 249575,
+			"4": 250539,
+		})
+
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	expected =
+		"[1]  :  25.006374% : 250065\n" +
+			"[2]  :  24.982475% : 249826\n" +
+			"[3]  :  24.957375% : 249575\n" +
+			"[4]  :  25.053774% : 250539\n"
 	testing_utils.AssertEQ(t, expected, output)
 }

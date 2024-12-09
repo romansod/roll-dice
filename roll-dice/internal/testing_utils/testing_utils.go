@@ -8,11 +8,11 @@ package testing_utils
 import (
 	"bytes"
 	"os"
-	"strconv"
+	"runtime"
 	"testing"
 )
 
-const AssertFailed = "\nexpected : %v\nactual   : %v\n"
+const AssertFailed = "\n%s:%d:\n\nexpected : %v\nactual   : %v\n"
 
 // Disable stdout for test purposes. Called in conjunction
 // with RestoreStdout
@@ -96,7 +96,8 @@ func CaptureAndRestoreOutput(r *os.File, w *os.File, origStdout *os.File) string
 //		act string   : Actual value
 func AssertEQ(t *testing.T, exp string, act string) {
 	if exp != act {
-		t.Errorf(AssertFailed, exp, act)
+		_, file, line, _ := runtime.Caller(1)
+		t.Errorf(AssertFailed, file, line, exp, act)
 	}
 }
 
@@ -108,7 +109,24 @@ func AssertEQ(t *testing.T, exp string, act string) {
 //		exp int      : Expected value
 //		act int      : Actual value
 func AssertEQi(t *testing.T, exp int, act int) {
-	AssertEQ(t, strconv.Itoa(exp), strconv.Itoa(act))
+	if exp != act {
+		_, file, line, _ := runtime.Caller(1)
+		t.Errorf(AssertFailed, file, line, exp, act)
+	}
+}
+
+// Assert that Expected == Actual. If false then
+// report an error
+//
+//	Params
+//		t *testing.T : needed for calling Errorf
+//		exp bool     : Expected value
+//		act bool     : Actual value
+func AssertEQb(t *testing.T, exp bool, act bool) {
+	if exp != act {
+		_, file, line, _ := runtime.Caller(1)
+		t.Errorf(AssertFailed, file, line, exp, act)
+	}
 }
 
 // Assert that err is nil, ie no error occurred. If false then
@@ -119,6 +137,7 @@ func AssertEQi(t *testing.T, exp int, act int) {
 //		err error    : Error variable to check if nil
 func AssertNIL(t *testing.T, err error) {
 	if err != nil {
-		t.Errorf(AssertFailed, "nil", err.Error())
+		_, file, line, _ := runtime.Caller(1)
+		t.Errorf(AssertFailed, file, line, "nil", err.Error())
 	}
 }

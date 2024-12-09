@@ -121,8 +121,18 @@ func GenerateProbabilisticEvent(events int, possibilities []string) (map[string]
 
 // ProbEvent interface for use in options
 type ProbEventType interface {
-	Execute()               // Compute and display result
-	display(map[string]int) // Display results
+	validate() (bool, error) // Check input is valid
+	execute() error          // Compute and display result
+	display(map[string]int)  // Display results
+}
+
+func ValidateAndExecute(probEventType ProbEventType) error {
+	ok, err := probEventType.validate()
+	if !ok {
+		return err
+	}
+
+	return probEventType.execute()
 }
 
 // Utility to compute the percent: numerator / denominator
