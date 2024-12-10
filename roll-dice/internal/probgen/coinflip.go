@@ -8,11 +8,26 @@ package probgen
 
 import "fmt"
 
-const Heads = "Heads"
-const Tails = "Tails"
+// Potential values
+const (
+	Heads = "Heads"
+	Tails = "Tails"
+)
 
 type CoinFlip struct {
-	NumEvents int // number of coin flips
+	numEvents int // number of coin flips
+}
+
+// Initialize private fields
+//
+//	Params
+//		nEvents int : number of CoinFlip events
+//	Returns
+//		*CoinFlip : new CoinFlip object
+func NewCoinFlip(nEvents int) *CoinFlip {
+	return &CoinFlip{
+		numEvents: nEvents,
+	}
 }
 
 func (coinFlip CoinFlip) validate() (bool, error) {
@@ -22,7 +37,7 @@ func (coinFlip CoinFlip) validate() (bool, error) {
 
 func (coinFlip CoinFlip) execute() error {
 	res, err := GenerateProbabilisticEvent(
-		coinFlip.NumEvents,
+		coinFlip.numEvents,
 		[]string{
 			Heads,
 			Tails})
@@ -36,7 +51,7 @@ func (coinFlip CoinFlip) execute() error {
 
 // Print the coin flip results. Example:
 //
-// NumEvents: 123435
+// numEvents: 123435
 //
 // (H) :  49.882126% : 61572
 //
@@ -47,6 +62,14 @@ func (coinFlip CoinFlip) execute() error {
 func (coinFlip CoinFlip) display(res map[string]int) {
 	fmt.Printf(
 		"(H) : %10f%% : %d\n(T) : %10f%% : %d\n",
-		Percent(res[Heads], coinFlip.NumEvents), res[Heads],
-		Percent(res[Tails], coinFlip.NumEvents), res[Tails])
+		Percent(res[Heads], coinFlip.numEvents), res[Heads],
+		Percent(res[Tails], coinFlip.numEvents), res[Tails])
+}
+
+// Retrieve number of events
+//
+//	Returns
+//		int : number of events
+func (coinFlip CoinFlip) getNumEvents() int {
+	return coinFlip.numEvents
 }
