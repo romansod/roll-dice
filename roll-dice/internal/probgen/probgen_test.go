@@ -185,26 +185,33 @@ func TestConsumeEvent(t *testing.T) {
 	testing_utils.AssertEQi(t, expected, actual)
 }
 
-func TestNegGenProbEvent(t *testing.T) {
+func TestNegProbEventTypeValidate(t *testing.T) {
 	// Tests that invalid input types are sufficiently handled
 
 	// Invalid number of events (negative)
-	_, err := GenerateProbabilisticEvent(-1, make([]string, 0))
+	ok, err := validate(CoinFlip{numEvents: -1})
 	expected, actual := ErrInvalidEvents, err.Error()
+	testing_utils.AssertEQb(t, false, ok)
+	testing_utils.AssertEQ(t, expected, actual)
+
+	ok, err = validate(DiceRoll{numEvents: -1, numSides: D4})
+	expected, actual = ErrInvalidEvents, err.Error()
+	testing_utils.AssertEQb(t, false, ok)
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// Invalid number of events (zero)
-	_, err = GenerateProbabilisticEvent(0, make([]string, 0))
+	ok, err = validate(CoinFlip{numEvents: 0})
 	expected, actual = ErrInvalidEvents, err.Error()
+	testing_utils.AssertEQb(t, false, ok)
 	testing_utils.AssertEQ(t, expected, actual)
 
-	// Invalid possibilities (no possibilities given)
-	_, err = GenerateProbabilisticEvent(4, make([]string, 0))
-	expected, actual = ErrInvalidPossibilities, err.Error()
+	ok, err = validate(DiceRoll{numEvents: 0, numSides: D4})
+	expected, actual = ErrInvalidEvents, err.Error()
+	testing_utils.AssertEQb(t, false, ok)
 	testing_utils.AssertEQ(t, expected, actual)
 }
 
-func TestPosGenProbEvent(t *testing.T) {
+func TestPosProbEventTypeValidate(t *testing.T) {
 	// Tests that valid inputs will not fail.
 	//
 	// NOTE: we do not check these results as they are not
@@ -212,8 +219,60 @@ func TestPosGenProbEvent(t *testing.T) {
 	// which make the internal behavior deterministic
 	// exclusively for testing
 
-	_, err := GenerateProbabilisticEvent(4, []string{Heads, Tails})
+	ok, err := validate(CoinFlip{numEvents: 4})
+	testing_utils.AssertEQb(t, true, ok)
 	testing_utils.AssertNIL(t, err)
+
+	ok, err = validate(DiceRoll{numEvents: 4, numSides: D6})
+	testing_utils.AssertEQb(t, true, ok)
+	testing_utils.AssertNIL(t, err)
+}
+
+func TestDiceRollValidate(t *testing.T) {
+	// Test the validation of dice types
+
+	// Invalid dice types
+
+	// Smaller than all valid dice types
+	diceRoll := NewDiceRoll(3, 3)
+	ok, err := diceRoll.validate()
+	testing_utils.AssertEQb(t, false, ok)
+	testing_utils.AssertEQ(t, ErrInvalidDiceType, err.Error())
+
+	// Between two valid dice types
+	diceRoll = NewDiceRoll(3, 5)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, false, ok)
+	testing_utils.AssertEQ(t, ErrInvalidDiceType, err.Error())
+
+	// Greater than the largest dice type
+	diceRoll = NewDiceRoll(3, 21)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, false, ok)
+	testing_utils.AssertEQ(t, ErrInvalidDiceType, err.Error())
+
+
+	// Valid dice types (D4, D6, D10, D12, D20)
+
+	diceRoll = NewDiceRoll(3, D4)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, true, ok)
+
+	diceRoll = NewDiceRoll(3, D6)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, true, ok)
+
+	diceRoll = NewDiceRoll(3, D10)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, true, ok)
+
+	diceRoll = NewDiceRoll(3, D12)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, true, ok)
+
+	diceRoll = NewDiceRoll(3, D20)
+	ok, err = diceRoll.validate()
+	testing_utils.AssertEQb(t, true, ok)
 }
 
 func TestGrnProbEventCoinFlip(t *testing.T) {
@@ -239,19 +298,19 @@ func TestGrnProbEventCoinFlip(t *testing.T) {
 	testing_utils.AssertEQi(t, expected, actual)
 }
 
-func TestGenProbEventRollDice(t *testing.T) {
+func TestGenProbEventDiceRoll(t *testing.T) {
 	// This tests the full production -> consumption of
 	// probhen.ProbEvent.computeProbability
 	//
 	// - 6 dice roll test
 
 	initHardcodedRngNums([]int{0, 3, 5, 22, 7, 4})
-	rollDice := ProbEvent{
+	diceRoll := ProbEvent{
 		numEvents: 6,
 		outcomes:  []string{"1", "2", "3", "4", "5", "6"},
 		prng:      PRNG_for_testing}
 
-	res := rollDice.computeProbability()
+	res := diceRoll.computeProbability()
 
 	// 0 -> 1 x 1
 	expected, actual := 1, res["1"]
@@ -284,7 +343,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	// CoinFlip
 	origStdout, r, w := testing_utils.RedirectStdout()
 	// 1) Flip just one coin, make sure percent is formatted
-	coinFlip := CoinFlip{NumEvents: 1}
+	coinFlip := CoinFlip{numEvents: 1}
 	coinFlip.display(
 		map[string]int{
 			Heads: 1,
@@ -299,7 +358,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 
 	// 2) Small scale should have round numbers
 	origStdout, r, w = testing_utils.RedirectStdout()
-	coinFlip = CoinFlip{NumEvents: 10}
+	coinFlip = CoinFlip{numEvents: 10}
 	coinFlip.display(
 		map[string]int{
 			Heads: 4,
@@ -314,7 +373,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 
 	// 3) Large scale, non round should handle large values
 	origStdout, r, w = testing_utils.RedirectStdout()
-	coinFlip = CoinFlip{NumEvents: 1000005}
+	coinFlip = CoinFlip{numEvents: 1000005}
 	coinFlip.display(
 		map[string]int{
 			Heads: 499761,
@@ -328,34 +387,13 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	testing_utils.AssertEQ(t, expected, output)
 }
 
-func TestValidDiceType(t *testing.T) {
-	// Test the validation of dice types
-
-	// Invalid dice types
-	testing_utils.AssertEQb(t, false, validDiceType(0))
-	testing_utils.AssertEQb(t, false, validDiceType(1))
-	testing_utils.AssertEQb(t, false, validDiceType(3))
-	testing_utils.AssertEQb(t, false, validDiceType(5))
-	testing_utils.AssertEQb(t, false, validDiceType(8))
-	testing_utils.AssertEQb(t, false, validDiceType(11))
-	testing_utils.AssertEQb(t, false, validDiceType(13))
-	testing_utils.AssertEQb(t, false, validDiceType(19))
-	testing_utils.AssertEQb(t, false, validDiceType(21))
-
-	// Valid dice types
-	testing_utils.AssertEQb(t, true, validDiceType(D4))
-	testing_utils.AssertEQb(t, true, validDiceType(D6))
-	testing_utils.AssertEQb(t, true, validDiceType(D10))
-	testing_utils.AssertEQb(t, true, validDiceType(D12))
-	testing_utils.AssertEQb(t, true, validDiceType(D20))
-}
 func TestGenProbDisplaysDiceRoll(t *testing.T) {
 	// Test the display functions of ProbEventTypes
 
 	// DiceRoll
 	origStdout, r, w := testing_utils.RedirectStdout()
 	// 1) Flip just one coin, make sure percent is formatted
-	diceRoll := DiceRoll{NumEvents: 1, NumSides: D6}
+	diceRoll := DiceRoll{numEvents: 1, numSides: D6}
 	diceRoll.display(
 		map[string]int{
 			"1": 1,
@@ -378,7 +416,7 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 
 	// 2) Small scale should have round numbers
 	origStdout, r, w = testing_utils.RedirectStdout()
-	diceRoll = DiceRoll{NumEvents: 10, NumSides: D12}
+	diceRoll = DiceRoll{numEvents: 10, numSides: D12}
 	diceRoll.display(
 		map[string]int{
 			"1":  2,
@@ -413,7 +451,7 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 
 	// 3) Large scale, non round should handle large values
 	origStdout, r, w = testing_utils.RedirectStdout()
-	diceRoll = DiceRoll{NumEvents: 1000005, NumSides: D4}
+	diceRoll = DiceRoll{numEvents: 1000005, numSides: D4}
 	diceRoll.display(
 		map[string]int{
 			"1": 250065,

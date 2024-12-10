@@ -16,6 +16,7 @@ import (
 const ErrInvalidEvents = "invalid number of events: must be more than one event"
 const ErrInvalidPossibilities = "invalid number of possibilities: must have at least one possible outcome"
 
+// Generic probability event object
 type ProbEvent struct {
 	numEvents int           // Number of probabilistic events
 	outcomes  []string      // Total possible outcomes of events
@@ -108,9 +109,7 @@ func randNumGen(num_outcomes int) int {
 //
 //		returns : {"heads":2, "tails":1}
 func GenerateProbabilisticEvent(events int, possibilities []string) (map[string]int, error) {
-	if events < 1 {
-		return nil, errors.New(ErrInvalidEvents)
-	} else if len(possibilities) < 1 {
+	if len(possibilities) < 1 {
 		// Must have at least one possible outcome
 		return nil, errors.New(ErrInvalidPossibilities)
 	}
@@ -124,15 +123,38 @@ type ProbEventType interface {
 	validate() (bool, error) // Check input is valid
 	execute() error          // Compute and display result
 	display(map[string]int)  // Display results
+	getNumEvents() int       // Retrieve number of events
 }
 
 func ValidateAndExecute(probEventType ProbEventType) error {
-	ok, err := probEventType.validate()
+	// Generic probability event validation
+	ok, err := validate(probEventType)
+	if !ok {
+		return err
+	}
+
+	// Specialized probability event validation
+	ok, err = probEventType.validate()
 	if !ok {
 		return err
 	}
 
 	return probEventType.execute()
+}
+
+// Generally applicable ProbEvent validation
+//
+//	Params
+//		probEventType ProbEventType : probability event to check
+//	Returns
+//		bool  : valid status
+//		error : indicates any errors leading to validation failure
+func validate(probEventType ProbEventType) (bool, error) {
+	if probEventType.getNumEvents() < 1 {
+		return false, errors.New(ErrInvalidEvents)
+	}
+
+	return true, nil
 }
 
 // Utility to compute the percent: numerator / denominator

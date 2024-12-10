@@ -51,7 +51,8 @@ func (options Options) displayOptions() {
 
 // Register all Options
 //
-//	opts[optNum] = Opt{name: _, optNum: _}
+//	Example:
+//		opts[optNum] = Opt{name: _, optNum: _}
 func (options *Options) registerOptions() {
 	options.opts = make(map[int]Opt)
 	options.opts[exit] = OptExit{name: "Exit", optNum: exit}
@@ -90,6 +91,8 @@ type OptExit struct {
 }
 
 func (optExit OptExit) process() error {
+	// Simply exit gracefully
+
 	fmt.Print("Exiting now ")
 	for i := 0; i < 3; i++ {
 		time.Sleep(500 * time.Millisecond)
@@ -116,15 +119,15 @@ type OptFlipCoins struct {
 }
 
 func (optFlipCoins OptFlipCoins) process() error {
-	// Only need the number of coin flips, the possible
-	// outcomes are already known
-	fmt.Print("Please enter the number of coin flips\n")
+	// Prompt user for the number of coin flips they want to do
+
+	fmt.Print("Please enter the number of coin flips:\n")
 	input, err := processInput(os.Stdin)
 	if err != nil {
 		return errors.New(SyntaxErrExpectedInt)
 	}
 
-	coinFlip := probgen.CoinFlip{NumEvents: input}
+	coinFlip := probgen.NewCoinFlip(input)
 
 	return probgen.ValidateAndExecute(coinFlip)
 }
@@ -145,21 +148,21 @@ type OptRollDice struct {
 }
 
 func (optRollDice OptRollDice) process() error {
-	// Need the number of sides on the dice
+	// Prompt the user for the number of sides on the dice
 	fmt.Printf("Please select the number of dice sides %s:\n", probgen.ValidDiceTypes)
 	sides, err := processInput(os.Stdin)
 	if err != nil {
 		return errors.New(SyntaxErrExpectedInt)
 	}
 
-	// Need the number of rolls for the dice
-	fmt.Print("Please enter the number of dice rolls\n")
+	// Prompt the user for the number of rolls for the dice
+	fmt.Print("Please enter the number of dice rolls:\n")
 	rolls, err := processInput(os.Stdin)
 	if err != nil {
 		return errors.New(SyntaxErrExpectedInt)
 	}
 
-	diceRoll := probgen.DiceRoll{NumEvents: rolls, NumSides: sides}
+	diceRoll := probgen.NewDiceRoll(rolls, sides)
 
 	return probgen.ValidateAndExecute(diceRoll)
 }
@@ -191,15 +194,15 @@ func processInput(stdin io.Reader) (int, error) {
 // Main driving function. Will continue to prompt user for input
 // until failure or user asks to exit
 func Menu() {
-	user_exit := false
+	input, err := -1, error(nil)
 
 	menu_options := Options{}
 	menu_options.registerOptions()
 
-	for !user_exit {
+	for input != exit {
 		// User input for menu option parsed
 		menu_options.displayOptions()
-		input, err := processInput(os.Stdin)
+		input, err = processInput(os.Stdin)
 		if err != nil {
 			fmt.Print(SyntaxErrExpectedInt)
 			continue
@@ -210,9 +213,5 @@ func Menu() {
 		if err != nil {
 			fmt.Print(err)
 		}
-
-		// End of iteration
-		// When exit is selected, stop here
-		user_exit = input == exit
 	}
 }
