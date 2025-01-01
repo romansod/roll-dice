@@ -49,13 +49,13 @@ func TestProcessInput(t *testing.T) {
 	// Err : non-numeric
 	stdin.Write([]byte("invalid"))
 	expected = "strconv.Atoi: parsing \"invalid\": invalid syntax"
-	_, err := processInput(&stdin)
+	_, _, err := processInput(&stdin)
 	testing_utils.AssertEQ(t, expected, err.Error())
 	stdin.Reset()
 
 	// Pass : unsupported
 	stdin.Write([]byte("-1"))
-	input, err := processInput(&stdin)
+	_, input, err := processInput(&stdin)
 	testing_utils.AssertNIL(t, err)
 	testing_utils.AssertEQi(t, -1, input)
 	stdin.Reset()
@@ -73,24 +73,26 @@ func TestMenuOptions(t *testing.T) {
 	expected := ""
 
 	/// - -1) Unsupported Option
-	err := options.runOption(-1)
+	done, err := options.runOption(-1)
 	expected = ErrUnsupported
 	testing_utils.AssertEQ(t, expected, err.Error())
+	testing_utils.AssertEQb(t, false, done)
 
 	/// - 0) Exit
-	err = options.runOption(exit)
+	done, err = options.runOption(exit)
 	expected = "nil"
 	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQb(t, true, done)
 
 	/// - 1) Flip Coins
-	err = options.runOption(flip_coins)
-	expected = SyntaxErrExpectedInt
-	testing_utils.AssertEQ(t, expected, err.Error())
+	done, err = options.runOption(flip_coins)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQb(t, false, done)
 
 	/// - 2) Roll Dice
-	err = options.runOption(roll_dice)
-	expected = SyntaxErrExpectedInt
-	testing_utils.AssertEQ(t, expected, err.Error())
+	done, err = options.runOption(roll_dice)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQb(t, false, done)
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
 }
