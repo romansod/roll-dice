@@ -73,7 +73,16 @@ func (options Options) runOption(opt int) (bool, error) {
 	if exists {
 		for !done {
 			done, err = opt_t.process()
+
+			if err != nil {
+				// Give feedback on any errors before next prompt
+				fmt.Print(err.Error())
+			}
+
+			fmt.Print("\n\n")
 		}
+
+		fmt.Print("Returning to main menu ...\n")
 
 		done = done && opt == exit
 	}

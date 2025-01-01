@@ -6,13 +6,30 @@ describes coin flips
 */
 package probgen
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Potential values
 const (
 	Heads = "Heads"
 	Tails = "Tails"
 )
+
+// All visual representations of coins
+var coinVisuals = []string{
+	" -----\n" +
+		"/     \\\n" +
+		"|  H  |\n" +
+		"\\     /\n" +
+		" -----\n",
+	" -----\n" +
+		"/     \\\n" +
+		"|  T  |\n" +
+		"\\     /\n" +
+		" -----\n",
+}
 
 type CoinFlip struct {
 	numEvents int // number of coin flips
@@ -49,6 +66,23 @@ func (coinFlip CoinFlip) execute() error {
 	return err
 }
 
+func (coinFlip CoinFlip) DisplayOneAction() {
+	pe := ProbEvent{
+		numEvents: 1,
+		outcomes: []string{
+			Heads,
+			Tails},
+		prng: randNumGen}
+
+	pev := pe.getProbValue()
+	res, err := strconv.Atoi(pev)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	fmt.Print(coinVisuals[res])
+}
+
 // Print the coin flip results. Example:
 //
 // numEvents: 123435
@@ -64,6 +98,8 @@ func (coinFlip CoinFlip) display(res map[string]int) {
 		"(H) : %10f%% : %d\n(T) : %10f%% : %d\n",
 		Percent(res[Heads], coinFlip.numEvents), res[Heads],
 		Percent(res[Tails], coinFlip.numEvents), res[Tails])
+
+	fmt.Print("\n")
 }
 
 // Retrieve number of events

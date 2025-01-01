@@ -141,3 +141,19 @@ func AssertNIL(t *testing.T, err error) {
 		t.Errorf(AssertFailed, file, line, "nil", err.Error())
 	}
 }
+
+// Check whether a particular item is in the slice
+//
+//	Params
+//		s []T  : slice to check for membership
+//		item T : the item to check for in s
+//	Returns
+//		bool : true if found, false otherwise
+func Contains[T comparable](s []T, item T) bool {
+	for _, v := range s {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}

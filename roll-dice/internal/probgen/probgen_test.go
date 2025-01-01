@@ -251,27 +251,26 @@ func TestDiceRollValidate(t *testing.T) {
 	testing_utils.AssertEQb(t, false, ok)
 	testing_utils.AssertEQ(t, ErrInvalidDiceType, err.Error())
 
-
 	// Valid dice types (D4, D6, D10, D12, D20)
 
 	diceRoll = NewDiceRoll(3, D4)
-	ok, err = diceRoll.validate()
+	ok, _ = diceRoll.validate()
 	testing_utils.AssertEQb(t, true, ok)
 
 	diceRoll = NewDiceRoll(3, D6)
-	ok, err = diceRoll.validate()
+	ok, _ = diceRoll.validate()
 	testing_utils.AssertEQb(t, true, ok)
 
 	diceRoll = NewDiceRoll(3, D10)
-	ok, err = diceRoll.validate()
+	ok, _ = diceRoll.validate()
 	testing_utils.AssertEQb(t, true, ok)
 
 	diceRoll = NewDiceRoll(3, D12)
-	ok, err = diceRoll.validate()
+	ok, _ = diceRoll.validate()
 	testing_utils.AssertEQb(t, true, ok)
 
 	diceRoll = NewDiceRoll(3, D20)
-	ok, err = diceRoll.validate()
+	ok, _ = diceRoll.validate()
 	testing_utils.AssertEQb(t, true, ok)
 }
 
@@ -353,7 +352,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	expected :=
 		"(H) : 100.000000% : 1\n" +
-			"(T) :   0.000000% : 0\n"
+			"(T) :   0.000000% : 0\n\n"
 	testing_utils.AssertEQ(t, expected, output)
 
 	// 2) Small scale should have round numbers
@@ -368,7 +367,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	expected =
 		"(H) :  40.000000% : 4\n" +
-			"(T) :  60.000000% : 6\n"
+			"(T) :  60.000000% : 6\n\n"
 	testing_utils.AssertEQ(t, expected, output)
 
 	// 3) Large scale, non round should handle large values
@@ -383,7 +382,7 @@ func TestGenProbDisplaysCoinFlip(t *testing.T) {
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	expected =
 		"(H) :  49.975849% : 499761\n" +
-			"(T) :  50.024151% : 500244\n"
+			"(T) :  50.024151% : 500244\n\n"
 	testing_utils.AssertEQ(t, expected, output)
 }
 
@@ -411,7 +410,7 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 			"[3]  :   0.000000% : 0\n" +
 			"[4]  :   0.000000% : 0\n" +
 			"[5]  :   0.000000% : 0\n" +
-			"[6]  :   0.000000% : 0\n"
+			"[6]  :   0.000000% : 0\n\n"
 	testing_utils.AssertEQ(t, expected, output)
 
 	// 2) Small scale should have round numbers
@@ -446,7 +445,7 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 			"[9]  :   0.000000% : 0\n" +
 			"[10] :   0.000000% : 0\n" +
 			"[11] :  10.000000% : 1\n" +
-			"[12] :  10.000000% : 1\n"
+			"[12] :  10.000000% : 1\n\n"
 	testing_utils.AssertEQ(t, expected, output)
 
 	// 3) Large scale, non round should handle large values
@@ -465,6 +464,45 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 		"[1]  :  25.006374% : 250065\n" +
 			"[2]  :  24.982475% : 249826\n" +
 			"[3]  :  24.957375% : 249575\n" +
-			"[4]  :  25.053774% : 250539\n"
+			"[4]  :  25.053774% : 250539\n\n"
 	testing_utils.AssertEQ(t, expected, output)
+}
+
+func TestDisplayOneDiceRollUnsupported(t *testing.T) {
+	// Test the proper unsupported dice type handling for single action
+
+	// Single D4 (-)
+	origStdout, r, w := testing_utils.RedirectStdout()
+
+	DisplayOneAction(D4)
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
+
+	// Single D6 (+)
+	origStdout, r, w = testing_utils.RedirectStdout()
+
+	DisplayOneAction(D6)
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQb(t, true, testing_utils.Contains(d6Visuals, output))
+
+	// Single D10 (-)
+	origStdout, r, w = testing_utils.RedirectStdout()
+
+	DisplayOneAction(D10)
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
+
+	// Single D12 (-)
+	origStdout, r, w = testing_utils.RedirectStdout()
+
+	DisplayOneAction(D12)
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
+
+	// Single D20 (-)
+	origStdout, r, w = testing_utils.RedirectStdout()
+
+	DisplayOneAction(D20)
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 }
