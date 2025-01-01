@@ -13,6 +13,7 @@ import (
 )
 
 const ErrInvalidDiceType = "invalid number of dice sides: must be one of " + ValidDiceTypes
+const ErrUnsupportedDiceType = "unsupported dice type, only support D6 for now"
 
 // Potential dice types
 const (
@@ -33,6 +34,40 @@ var dicePossibleValues = []string{
 	"7", "8", "9", "10", // -> D10
 	"11", "12", // -> D12
 	"13", "14", "15", "16", "17", "18", "19", "20", // -> D20
+}
+
+// All visual representations of 6 sided dice
+var d6Visuals = []string{
+	" -------\n" +
+		"|       |\n" +
+		"|   o   |\n" +
+		"|       |\n" +
+		" -------\n",
+	" -------\n" +
+		"| o     |\n" +
+		"|       |\n" +
+		"|     o |\n" +
+		" -------\n",
+	" -------\n" +
+		"| o     |\n" +
+		"|   o   |\n" +
+		"|     o |\n" +
+		" -------\n",
+	" -------\n" +
+		"| o   o |\n" +
+		"|       |\n" +
+		"| o   o |\n" +
+		" -------\n",
+	" -------\n" +
+		"| o   o |\n" +
+		"|   o   |\n" +
+		"| o   o |\n" +
+		" -------\n",
+	" -------\n" +
+		"| o   o |\n" +
+		"| o   o |\n" +
+		"| o   o |\n" +
+		" -------\n",
 }
 
 type DiceRoll struct {
@@ -75,16 +110,43 @@ func (diceRoll DiceRoll) execute() error {
 	return err
 }
 
-// Print the coin flip results. Example:
+func DisplayOneAction(nSides int) {
+	pe := ProbEvent{
+		numEvents: 1,
+		outcomes:  possibleDiceValues(nSides),
+		prng:      randNumGen}
+
+	pev := pe.getProbValue()
+	res, err := strconv.Atoi(pev)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+
+	// Only support D6 for now
+	switch nSides {
+	case D6:
+		fmt.Print(d6Visuals[res])
+	default:
+		fmt.Print(ErrUnsupportedDiceType)
+	}
+}
+
+// Print the dice roll results. Example:
 //
-// numEvents: 123435
+// numEvents: 2
 //
-// (H) :  49.882126% : 61572
+// numSides: 4
 //
-// (T) :  50.117874% : 61863
+// [1]  :  50.00000% : 1
+//
+// [2] :   50.00000% : 1
+//
+// [3] :    0.00000% : 0
+//
+// [4] :    0.00000% : 0
 //
 //	Params
-//		res map[string]int : results of coin flips
+//		res map[string]int : results of dice rolls
 func (diceRoll DiceRoll) display(res map[string]int) {
 	for i := 1; i <= diceRoll.numSides; i++ {
 		i_s := strconv.Itoa(i)
@@ -95,6 +157,7 @@ func (diceRoll DiceRoll) display(res map[string]int) {
 			res[i_s],
 		)
 	}
+	fmt.Print("\n")
 }
 
 // Retrieve number of events
