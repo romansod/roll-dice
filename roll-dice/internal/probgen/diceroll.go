@@ -110,6 +110,13 @@ func (diceRoll DiceRoll) execute() error {
 	return err
 }
 
+// Exposed endpoint to execute one dice roll and
+// print out a visual of the result
+//
+// NOTE: not all dice types are supported yet
+//
+//	Params
+//		nSides int : indicate the number of sides for the dice
 func DisplayOneRollAction(nSides int) {
 	pe := ProbEvent{
 		numEvents: 1,

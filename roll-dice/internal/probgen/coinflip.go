@@ -65,6 +65,8 @@ func (coinFlip CoinFlip) execute() error {
 	return err
 }
 
+// Exposed endpoint to execute one coin flip and
+// print out a visual of the result
 func DisplayOneFlipAction() {
 	pe := ProbEvent{
 		numEvents: 1,
