@@ -468,41 +468,56 @@ func TestGenProbDisplaysDiceRoll(t *testing.T) {
 	testing_utils.AssertEQ(t, expected, output)
 }
 
-func TestDisplayOneDiceRollUnsupported(t *testing.T) {
-	// Test the proper unsupported dice type handling for single action
+func TestDisplayOneCoinFlip(t *testing.T) {
+	// Test the proper coin handling for single action
+
+	// Single coin (+)
+	origStdout, r, w := testing_utils.RedirectStdout()
+
+	DisplayOneFlipAction()
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	// Since this is non deterministic, just check if it is
+	// one of the acceptable results
+	testing_utils.AssertEQb(t, true, testing_utils.ContainsV(coinVisuals, output))
+}
+
+func TestDisplayOneDiceRoll(t *testing.T) {
+	// Test the proper supported and unsupported dice type handling for single action
 
 	// Single D4 (-)
 	origStdout, r, w := testing_utils.RedirectStdout()
 
-	DisplayOneAction(D4)
+	DisplayOneRollAction(D4)
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D6 (+)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneAction(D6)
+	DisplayOneRollAction(D6)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQb(t, true, testing_utils.Contains(d6Visuals, output))
+	// Since this is non deterministic, just check if it is
+	// one of the acceptable results
+	testing_utils.AssertEQb(t, true, testing_utils.ContainsV(d6Visuals, output))
 
 	// Single D10 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneAction(D10)
+	DisplayOneRollAction(D10)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D12 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneAction(D12)
+	DisplayOneRollAction(D12)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D20 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneAction(D20)
+	DisplayOneRollAction(D20)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 }
