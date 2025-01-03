@@ -8,7 +8,6 @@ package probgen
 
 import (
 	"fmt"
-	"strconv"
 )
 
 // Potential values
@@ -18,13 +17,13 @@ const (
 )
 
 // All visual representations of coins
-var coinVisuals = []string{
-	" -----\n" +
+var coinVisuals = map[string]string{
+	Heads: " -----\n" +
 		"/     \\\n" +
 		"|  H  |\n" +
 		"\\     /\n" +
 		" -----\n",
-	" -----\n" +
+	Tails: " -----\n" +
 		"/     \\\n" +
 		"|  T  |\n" +
 		"\\     /\n" +
@@ -66,7 +65,9 @@ func (coinFlip CoinFlip) execute() error {
 	return err
 }
 
-func (coinFlip CoinFlip) DisplayOneAction() {
+// Exposed endpoint to execute one coin flip and
+// print out a visual of the result
+func DisplayOneFlipAction() {
 	pe := ProbEvent{
 		numEvents: 1,
 		outcomes: []string{
@@ -74,11 +75,7 @@ func (coinFlip CoinFlip) DisplayOneAction() {
 			Tails},
 		prng: randNumGen}
 
-	pev := pe.getProbValue()
-	res, err := strconv.Atoi(pev)
-	if err != nil {
-		fmt.Print(err.Error())
-	}
+	res := pe.getProbValue()
 
 	fmt.Print(coinVisuals[res])
 }

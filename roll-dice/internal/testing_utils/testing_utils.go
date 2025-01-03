@@ -142,18 +142,22 @@ func AssertNIL(t *testing.T, err error) {
 	}
 }
 
-// Check whether a particular item is in the slice
+// ContainsV checks whether a particular item is in the map's values.
 //
-//	Params
-//		s []T  : slice to check for membership
-//		item T : the item to check for in s
-//	Returns
-//		bool : true if found, false otherwise
-func Contains[T comparable](s []T, item T) bool {
-	for _, v := range s {
-		if v == item {
+// Params
+//
+//	m map[K]V : map to check for membership
+//	value V   : the value to check for in m
+//
+// Returns
+//
+//	bool : true if found, false otherwise
+func ContainsV[K comparable, V comparable](m map[K]V, value V) bool {
+	for _, v := range m {
+		if v == value {
 			return true
 		}
 	}
+
 	return false
 }

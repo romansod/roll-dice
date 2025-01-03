@@ -37,33 +37,33 @@ var dicePossibleValues = []string{
 }
 
 // All visual representations of 6 sided dice
-var d6Visuals = []string{
-	" -------\n" +
+var d6Visuals = map[string]string{
+	dicePossibleValues[0]: " -------\n" +
 		"|       |\n" +
 		"|   o   |\n" +
 		"|       |\n" +
 		" -------\n",
-	" -------\n" +
+	dicePossibleValues[1]: " -------\n" +
 		"| o     |\n" +
 		"|       |\n" +
 		"|     o |\n" +
 		" -------\n",
-	" -------\n" +
+	dicePossibleValues[2]: " -------\n" +
 		"| o     |\n" +
 		"|   o   |\n" +
 		"|     o |\n" +
 		" -------\n",
-	" -------\n" +
+	dicePossibleValues[3]: " -------\n" +
 		"| o   o |\n" +
 		"|       |\n" +
 		"| o   o |\n" +
 		" -------\n",
-	" -------\n" +
+	dicePossibleValues[4]: " -------\n" +
 		"| o   o |\n" +
 		"|   o   |\n" +
 		"| o   o |\n" +
 		" -------\n",
-	" -------\n" +
+	dicePossibleValues[5]: " -------\n" +
 		"| o   o |\n" +
 		"| o   o |\n" +
 		"| o   o |\n" +
@@ -110,17 +110,20 @@ func (diceRoll DiceRoll) execute() error {
 	return err
 }
 
-func DisplayOneAction(nSides int) {
+// Exposed endpoint to execute one dice roll and
+// print out a visual of the result
+//
+// NOTE: not all dice types are supported yet
+//
+//	Params
+//		nSides int : indicate the number of sides for the dice
+func DisplayOneRollAction(nSides int) {
 	pe := ProbEvent{
 		numEvents: 1,
 		outcomes:  possibleDiceValues(nSides),
 		prng:      randNumGen}
 
-	pev := pe.getProbValue()
-	res, err := strconv.Atoi(pev)
-	if err != nil {
-		fmt.Print(err.Error())
-	}
+	res := pe.getProbValue()
 
 	// Only support D6 for now
 	switch nSides {
