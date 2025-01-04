@@ -67,6 +67,14 @@ func (shutTheBox ShutTheBox) printGameState() {
 	fmt.Print(gstate)
 }
 
+// Check the win condition: box is shut
+//
+//	Returns
+//		bool : true if box is totally shut, false otherwise
+func (shutTheBox ShutTheBox) checkWinCondition() bool {
+	return IsBoxEmpty(shutTheBox.gameState)
+}
+
 // Check whether provided input is valid to satisfy the target
 //
 //	Params
