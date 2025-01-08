@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/romansod/roll-dice/internal/games"
 	"github.com/romansod/roll-dice/internal/probgen"
 )
 
@@ -137,7 +138,7 @@ func (optFlipCoins OptFlipCoins) process() (bool, error) {
 	// Prompt user for the number of coin flips they want to do
 
 	fmt.Print("Please enter the number of coin flips:\n")
-	done, input, err := processInput(os.Stdin)
+	done, input, err := processInputInt(os.Stdin)
 
 	if done {
 		return true, err
@@ -170,7 +171,7 @@ type OptRollDice struct {
 func (optRollDice OptRollDice) process() (bool, error) {
 	// Prompt the user for the number of sides on the dice
 	fmt.Printf("Please select the number of dice sides %s:\n", probgen.ValidDiceTypes)
-	done, sides, err := processInput(os.Stdin)
+	done, sides, err := processInputInt(os.Stdin)
 	if done {
 		return true, err
 	}
@@ -181,7 +182,7 @@ func (optRollDice OptRollDice) process() (bool, error) {
 
 	// Prompt the user for the number of rolls for the dice
 	fmt.Print("Please enter the number of dice rolls:\n")
-	done, rolls, err := processInput(os.Stdin)
+	done, rolls, err := processInputInt(os.Stdin)
 	if done {
 		return true, err
 	}
@@ -203,7 +204,38 @@ func (optRollDice OptRollDice) getOptNum() int {
 	return optRollDice.optNum
 }
 
-// Process user input
+/// - 3) Roll Dice
+
+type OptShutTheBox struct {
+	name   string
+	optNum int
+}
+
+func (optShutTheBox OptShutTheBox) process() (bool, error) {
+	done, players, err := getPlayers(os.Stdin)
+	if done {
+		return true, err
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	shutTheBox := games.NewShutBox(players)
+	shutTheBox.Run()
+
+	return false, nil
+}
+
+func (optShutTheBox OptShutTheBox) getName() string {
+	return optShutTheBox.name
+}
+
+func (optShutTheBox OptShutTheBox) getOptNum() int {
+	return optShutTheBox.optNum
+}
+
+// Process user number input
 //
 //	Params
 //		stdin io.Reader : holds user input
@@ -212,17 +244,58 @@ func (optRollDice OptRollDice) getOptNum() int {
 //		bool  : true if user indicates they are done
 //		int   : option as number
 //		error : any error encountered by string to int conversion
-func processInput(stdin io.Reader) (bool, int, error) {
+func processInputInt(stdin io.Reader) (bool, int, error) {
+	done, input_str, err := processInputStr(stdin)
+	input := -1
+	if !done {
+		input, err = strconv.Atoi(input_str)
+	}
+
+	return done, input, err
+}
+
+func processInputStr(stdin io.Reader) (bool, string, error) {
 	scanner := bufio.NewScanner(stdin)
 	scanner.Scan()
 	if scanner.Text() == "" {
 		// User is done providing inputs
-		return true, -1, nil
+		return true, "", nil
 	}
 	// Add extra space after input to avoid clutter
 	fmt.Print("\n")
-	input, err := strconv.Atoi(scanner.Text())
-	return false, input, err
+	return false, scanner.Text(), nil
+}
+
+func getPlayers(stdin io.Reader) (bool, []string, error) {
+	// Prompt the user for the number of sides on the dice
+	fmt.Print("Please indicate the number of players:\n")
+	done, players_n, err := processInputInt(stdin)
+	if done {
+		return true, nil, err
+	}
+
+	if err != nil {
+		return false, nil, errors.New(SyntaxErrExpectedInt)
+	}
+
+	players := make([]string, players_n)
+
+	for i := 0; i < players_n; i++ {
+		// Prompt the user for the number of rolls for the dice
+		fmt.Print("Please enter the number of dice rolls:\n")
+		done, player, err := processInputStr(stdin)
+		if done {
+			return true, nil, err
+		}
+
+		if err != nil {
+			return false, nil, err
+		}
+
+		players = append(players, player)
+	}
+
+	return false, players, nil
 }
 
 // Main driving function. Will continue to prompt user for input
@@ -240,7 +313,7 @@ func Menu() {
 		menu_options.displayOptions()
 		// Errors from processing options fall back to the
 		// main menu to here where user is prompted again
-		_, input, err = processInput(os.Stdin)
+		_, input, err = processInputInt(os.Stdin)
 
 		if err != nil {
 			fmt.Print(SyntaxErrExpectedInt)

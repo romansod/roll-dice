@@ -49,13 +49,13 @@ func TestProcessInput(t *testing.T) {
 	// Err : non-numeric
 	stdin.Write([]byte("invalid"))
 	expected = "strconv.Atoi: parsing \"invalid\": invalid syntax"
-	_, _, err := processInput(&stdin)
+	_, _, err := processInputInt(&stdin)
 	testing_utils.AssertEQ(t, expected, err.Error())
 	stdin.Reset()
 
 	// Pass : unsupported
 	stdin.Write([]byte("-1"))
-	_, input, err := processInput(&stdin)
+	_, input, err := processInputInt(&stdin)
 	testing_utils.AssertNIL(t, err)
 	testing_utils.AssertEQi(t, -1, input)
 	stdin.Reset()

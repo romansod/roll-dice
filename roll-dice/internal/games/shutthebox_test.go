@@ -95,156 +95,147 @@ func TestSetBitEmpty(t *testing.T) {
 	testing_utils.AssertEQb(t, true, IsBoxEmpty(setvar))
 }
 
-func TestCombineDigits(t *testing.T) {
-	// Test the helper function for combining digits from
-	// a string. Inputs are also verified
-
-	// (-) Invalid inputs
-	output, err := combineDigits("")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	output, err = combineDigits("1a345")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	output, err = combineDigits("asdf")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	output, err = combineDigits("-2")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	output, err = combineDigits("0")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	output, err = combineDigits("4209")
-	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
-	testing_utils.AssertEQi(t, -1, output)
-
-	// (+) Valid inputs
-	output, err = combineDigits("1")
-	testing_utils.AssertNIL(t, err)
-	testing_utils.AssertEQi(t, 1, output)
-
-	output, err = combineDigits("145")
-	testing_utils.AssertNIL(t, err)
-	testing_utils.AssertEQi(t, 10, output)
-
-	output, err = combineDigits("12345")
-	testing_utils.AssertNIL(t, err)
-	testing_utils.AssertEQi(t, 15, output)
-
-	output, err = combineDigits("4597362")
-	testing_utils.AssertNIL(t, err)
-	testing_utils.AssertEQi(t, 36, output)
-}
-
 func TestIsValidShutInput(t *testing.T) {
-	// Test the verification of input from a players turn
+	// Test the verification and processing of input from a players turn
 
 	// Ignoring stdout helps with extra lines added to processInput
 	origStdout, ignoreOut := testing_utils.IgnoreStdout()
 
+	gstate := OpenBox
+
 	// (-) Invalid inputs
-	output := isValidShutInput("", 6)
-	testing_utils.AssertEQb(t, false, output)
+	_, err := processProposedUpdate(gstate, "", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
-	output = isValidShutInput("1a345", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "1a345", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
-	output = isValidShutInput("asdf", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "asdf", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
-	output = isValidShutInput("-2", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "-2", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
-	output = isValidShutInput("0", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "0", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
-	output = isValidShutInput("4209", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "4209", 6)
+	testing_utils.AssertEQ(t, ErrInvDigit, err.Error())
 
 	// (-) Combined != Target
-	output = isValidShutInput("1", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "1", 6)
+	testing_utils.AssertEQ(t, fmt.Sprintf(ErrNotEqTarget, 1, 6), err.Error())
 
-	output = isValidShutInput("145", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "145", 6)
+	testing_utils.AssertEQ(t, fmt.Sprintf(ErrNotEqTarget, 10, 6), err.Error())
 
-	output = isValidShutInput("12345", 6)
-	testing_utils.AssertEQb(t, false, output)
+	gstate = OpenBox
+	_, err = processProposedUpdate(gstate, "12345", 6)
+	testing_utils.AssertEQ(t, fmt.Sprintf(ErrNotEqTarget, 15, 6), err.Error())
 
 	// (+) Combined == Target
-	output = isValidShutInput("1", 1)
-	testing_utils.AssertEQb(t, true, output)
+	gstate = OpenBox
+	gstate_processed, err := processProposedUpdate(gstate, "1", 1)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQ(t, "[_][2][3][4][5][6][7][8][9]", AssembleSlotsToDisplay(gstate_processed))
 
-	output = isValidShutInput("145", 10)
-	testing_utils.AssertEQb(t, true, output)
+	gstate_processed, err = processProposedUpdate(gstate, "45", 9)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQ(t, "[1][2][3][_][_][6][7][8][9]", AssembleSlotsToDisplay(gstate_processed))
 
-	output = isValidShutInput("12345", 15)
-	testing_utils.AssertEQb(t, true, output)
+	gstate_processed, err = processProposedUpdate(gstate, "1245", 12)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQ(t, "[_][_][3][_][_][6][7][8][9]", AssembleSlotsToDisplay(gstate_processed))
 
-	output = isValidShutInput("4597362", 36)
-	testing_utils.AssertEQb(t, true, output)
+	gstate_processed, err = processProposedUpdate(gstate, "134", 8)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQ(t, "[_][2][_][_][5][6][7][8][9]", AssembleSlotsToDisplay(gstate_processed))
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
 }
 
 func TestUpdateGameState(t *testing.T) {
 	// From an open box, update the game state until the
-	// box is closed
+	// box is closed. Also demonstrate no-op when update
+	// fails
 
 	// Capture the print output for testing
 	origStdout, r, w := testing_utils.RedirectStdout()
-	stb := NewShutBox()
+	stb := NewShutBox([]string{"p1"})
 	stb.printGameState()
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (+) Successful update of single slot
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("4")
+	stb.updateGameState("4", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[1][2][3][_][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (-) No op when given an update that is not valid
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("17")
+	stb.updateGameState("adg", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[_][2][3][_][5][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (-) No op when given an update that does not satisfy the target
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("235")
+	stb.updateGameState("178", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[_][_][_][_][_][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (+) Successful update of composite solution with two slots
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("9")
+	stb.updateGameState("17", 8)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[_][_][_][_][_][6][_][8][_]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][2][3][_][5][6][_][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (+) Successful update of composite solution with three slots
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("8")
+	stb.updateGameState("235", 10)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[_][_][_][_][_][6][_][_][_]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][8][9]", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
+	// (+) Successful update of the last slot
 	origStdout, r, w = testing_utils.RedirectStdout()
-	stb.updateGameState("6")
+	stb.updateGameState("9", 9)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "[_][_][_][_][_][_][_][_][_]", output)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][8][_]", output)
+	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
+
+	// (+) Successful update of internal isolated slot
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.updateGameState("8", 8)
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][_][_]", output)
+	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
+
+	// (+) Successful update of the final open slot to close the box and win
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.updateGameState("6", 6)
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][_][_][_][_]", output)
 	testing_utils.AssertEQb(t, true, stb.checkWinCondition())
 }
 
@@ -450,4 +441,97 @@ func TestTargetSumExists(t *testing.T) {
 			},
 		),
 	)
+}
+
+func TestNextTurn(t *testing.T) {
+	// Test the behavior for setting up the next turn, which includes:
+	// - opening the box
+	// - selecting the next player
+
+	// Capture the print output for testing
+	origStdout, r, w := testing_utils.RedirectStdout()
+	stb := NewShutBox([]string{"p1", "p2", "p3", "p4"})
+	stb.printGameState()
+	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// nextPlayer tests
+
+	// Increment the player p1 -> p2
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextPlayer()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p2\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// Increment the player p2 -> p3
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextPlayer()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p3\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// Increment the player p3 -> p4
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextPlayer()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p4\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// Increment the player p4 -> p1 LOOP BACK
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextPlayer()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// resetBox tests
+
+	// Close some slots
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.updateGameState("147", 12)
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[_][2][3][_][5][6][_][8][9]", output)
+
+	// Increment the player p1 -> p2
+	// Reset the box
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextPlayer()
+	stb.resetBox()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p2\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// Close some slots
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.updateGameState("147", 12)
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p2\n\n[_][2][3][_][5][6][_][8][9]", output)
+
+	// Increment the player p1 -> p2
+	// Reset the box
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextTurn()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p3\n\n[1][2][3][4][5][6][7][8][9]", output)
+
+	// Change player to p4 to test loop around
+	stb.nextPlayer()
+	// Close some slots
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.updateGameState("26", 8)
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p4\n\n[1][_][3][4][5][_][7][8][9]", output)
+
+	// Increment the player p4 -> p1 LOOP BACK
+	// Reset the box
+	origStdout, r, w = testing_utils.RedirectStdout()
+	stb.nextTurn()
+	stb.printGameState()
+	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
+	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
 }

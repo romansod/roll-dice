@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+
+	"github.com/romansod/roll-dice/internal/probgen"
 )
 
 /// Errors
@@ -32,38 +34,114 @@ const Slot string = "[%s]"
 const EmptySlot string = "_"
 
 type ShutTheBox struct {
-	gameState int
+	gameState int      // game state stored as 9 bits
+	players   []string // names of the players for this game
+	player_i  int      // current player
 }
 
 // Initialize private fields
 //
 //	Returns
 //		*ShutTheBox : new ShutTheBox object
-func NewShutBox() *ShutTheBox {
+func NewShutBox(allPlayers []string) *ShutTheBox {
 	return &ShutTheBox{
 		gameState: OpenBox, // game state stored as 9 bits
+		players:   allPlayers,
+		player_i:  0,
 	}
 }
 
-// Verified update to the game state in a single string
+// Set current player to the next player
+func (shutTheBox *ShutTheBox) nextPlayer() {
+	shutTheBox.player_i = (shutTheBox.player_i + 1) % len(shutTheBox.players)
+}
+
+// Fully open the box for the next turn
+func (shutTheBox *ShutTheBox) resetBox() {
+	shutTheBox.gameState = OpenBox
+}
+
+// The next turn requires opening the box and selecting the next player
+func (shutTheBox *ShutTheBox) nextTurn() {
+	shutTheBox.resetBox()
+	shutTheBox.nextPlayer()
+}
+
+// TODO still need to finish this function
+func (shutTheBox ShutTheBox) Run() {
+	game_done := false
+	for !game_done {
+
+		shutTheBox.printGameState()
+
+		if shutTheBox.checkWinCondition() {
+			// Congradulate
+			// Prompt to keep playing
+			// Exit
+			// Keep going
+			shutTheBox.nextTurn()
+			continue
+		}
+
+		roll1 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
+		roll2 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
+		target := roll1 + roll2
+
+		if !shutTheBox.checkSolutionExists(target) {
+			// Lost, next players turn
+			shutTheBox.nextTurn()
+			continue
+		}
+
+		// Player Action
+		action_done := false
+		for !game_done && !action_done {
+			fmt.Printf("Target sum is '%d' . Please enter open slots together:\n", target)
+			// Get input
+			input_slots := "123"
+			// Get ProcessInputInt
+			// Check if done
+			err := shutTheBox.updateGameState(input_slots, target)
+			if err != nil {
+				// Error feedback
+				fmt.Print(err.Error())
+			} else {
+				// Update succeeded
+				action_done = true
+			}
+		}
+	}
+}
+
+// Update the current game state with the provided arguments, unless an error
+// is encountered in which case no change persists
 //
 //	Params
-//		update string : digits referring to the slots to be closed. Ex: "142"
-func (shutTheBox *ShutTheBox) updateGameState(update string) {
-	for _, d := range update {
-		digit_i, _ := strconv.Atoi(string(d))
-
-		SetBitEmpty(&shutTheBox.gameState, GetValueSlot(digit_i))
+//		update string : proposed update. Ex: "137"
+//		target int    : target sum of update digits. Ex: 11
+//	Returns
+//		error : any errors encountered
+func (shutTheBox *ShutTheBox) updateGameState(update string, target int) error {
+	proposedUpdate, err := processProposedUpdate(shutTheBox.gameState, update, target)
+	if err == nil {
+		shutTheBox.gameState = proposedUpdate
 	}
+
+	return err
 }
 
-// Visualize the game state
+// Visualize the game state for the current player
 //
 // Ex: slot 1, 4, 7 are closed:
 //
-//	[_][2][3][_][5][6][_][8][9]
+// Player: p1
+//
+// [_][2][3][_][5][6][_][8][9]
 func (shutTheBox ShutTheBox) printGameState() {
-	fmt.Print(AssembleSlotsToDisplay(shutTheBox.gameState))
+	fmt.Printf(
+		"Player: %s\n\n%s",
+		shutTheBox.players[shutTheBox.player_i],
+		AssembleSlotsToDisplay(shutTheBox.gameState))
 }
 
 // Check the win condition: box is shut
@@ -86,52 +164,29 @@ func (shutTheBox ShutTheBox) checkSolutionExists(target int) bool {
 	return TargetSumExists(&gstate, target)
 }
 
-// Check whether provided input is valid to satisfy the target
+// Verify the proposed update, apply slot by slot to the game state
+// and then compare the final result with the target to ensure the
+// target value is satisfied. Returned error indicates whether the
+// updated game state should be used or ignored
 //
 //	Params
-//		shutInput string : digits referring to the slots to be closed. Ex: "142"
-//		target int       : the target for the sum of the shutInput
+//		gstate int    : game state to update
+//		update string : proposed update. Ex: "137"
+//		target int    : target sum of update digits. Ex: 11
 //	Returns
-//		bool : true if shutInput digits sum to the target
-func isValidShutInput(shutInput string, target int) bool {
-	// Sum the digits
-	combinedDigits, err := combineDigits(shutInput)
+//		int   : updated game state, or -1 when errors are encountered
+//		error : any error encountered
+func processProposedUpdate(gstate int, update string, target int) (int, error) {
+	combinedDigits := 0
 
-	if err != nil {
-		fmt.Print(err.Error())
-		return false
-	}
-
-	// Verify whether the inputs actually add up to the target
-	if combinedDigits != target {
-		fmt.Printf(ErrNotEqTarget, combinedDigits, target)
-		return false
-	}
-
-	return true
-}
-
-// Sum the individual digits. There are only valid inputs from [1,9]
-//
-// This function also checks for invalid inputs and returns errors
-// for empty inputs and string to int conversions
-//
-//	Params
-//		digits string : digits referring to the slots to be closed. Ex: "142"
-//	Returns
-//		int : the sum of the digits or -1 if error is encountered
-//		error : any errors encountered or nil
-func combineDigits(digits string) (int, error) {
 	// Empty input string is invalid
-	if digits == "" {
+	if update == "" {
 		return -1, errors.New(ErrInvDigit)
 	}
 
-	combinedDigits := 0
-
-	// Add all the digits together
-	for _, d := range digits {
+	for _, d := range update {
 		digit_i, err := strconv.Atoi(string(d))
+
 		// Any error in the conversion or an invalid digit will
 		// cause immediate termination of execution
 		if err != nil || digit_i < 1 {
@@ -139,9 +194,15 @@ func combineDigits(digits string) (int, error) {
 		}
 
 		combinedDigits += digit_i
+		SetBitEmpty(&gstate, GetValueSlot(digit_i))
 	}
 
-	return combinedDigits, nil
+	// Verify whether the inputs actually add up to the target
+	if combinedDigits != target {
+		return -1, fmt.Errorf(ErrNotEqTarget, combinedDigits, target)
+	}
+
+	return gstate, nil
 }
 
 // Check whether the bit in the bitset is on
