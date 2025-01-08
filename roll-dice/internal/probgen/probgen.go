@@ -27,9 +27,14 @@ type ProbEvent struct {
 // by the number of outcomes
 //
 //	Returns
-//		A randomly selected element of the outcomes field
-func (pe ProbEvent) getProbValue() string {
-	return pe.outcomes[pe.prng(len(pe.outcomes))]
+//		int : a randomly selected number from [0, num_pe_outcomes]
+func (pe ProbEvent) getProbValue() int {
+	rngn := pe.prng(len(pe.outcomes))
+	return rngn
+}
+
+func (pe ProbEvent) getProbOutcome(rngn int) string {
+	return pe.outcomes[rngn]
 }
 
 // Add a probability computation to the out channel
@@ -39,7 +44,7 @@ func (pe ProbEvent) getProbValue() string {
 func (pe ProbEvent) produceEvent(out chan string) {
 	defer close(out)
 	for i := 0; i < pe.numEvents; i++ {
-		out <- pe.getProbValue()
+		out <- pe.getProbOutcome(pe.getProbValue())
 	}
 }
 

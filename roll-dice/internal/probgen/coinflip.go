@@ -8,23 +8,24 @@ package probgen
 
 import (
 	"fmt"
-	"strconv"
 )
 
 // Potential values
 const (
 	Heads = "Heads"
+	H     = 0
 	Tails = "Tails"
+	T     = 1
 )
 
 // All visual representations of coins
-var coinVisuals = map[string]string{
-	Heads: " -----\n" +
+var coinVisuals = map[int]string{
+	H: " -----\n" +
 		"/     \\\n" +
 		"|  H  |\n" +
 		"\\     /\n" +
 		" -----\n",
-	Tails: " -----\n" +
+	T: " -----\n" +
 		"/     \\\n" +
 		"|  T  |\n" +
 		"\\     /\n" +
@@ -75,15 +76,14 @@ func DisplayOneFlipAction() int {
 	res := ExecuteOneFlipAction()
 
 	fmt.Print(coinVisuals[res])
-	res_i, _ := strconv.Atoi(res)
-	return res_i
+	return res
 }
 
 // One coin flip action
 //
 //	Returns
-//		string : coin flip value "Heads" or "Tails"
-func ExecuteOneFlipAction() string {
+//		int : coin flip value 0:"Heads" or 1:"Tails"
+func ExecuteOneFlipAction() int {
 	pe := ProbEvent{
 		numEvents: 1,
 		outcomes: []string{
