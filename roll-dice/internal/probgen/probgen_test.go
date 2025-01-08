@@ -487,14 +487,14 @@ func TestDisplayOneDiceRoll(t *testing.T) {
 	// Single D4 (-)
 	origStdout, r, w := testing_utils.RedirectStdout()
 
-	DisplayOneRollAction(D4)
+	ExecuteAndDisplayOneRollAction(D4)
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D6 (+)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneRollAction(D6)
+	ExecuteAndDisplayOneRollAction(D6)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	// Since this is non deterministic, just check if it is
 	// one of the acceptable results
@@ -503,21 +503,21 @@ func TestDisplayOneDiceRoll(t *testing.T) {
 	// Single D10 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneRollAction(D10)
+	ExecuteAndDisplayOneRollAction(D10)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D12 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneRollAction(D12)
+	ExecuteAndDisplayOneRollAction(D12)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 
 	// Single D20 (-)
 	origStdout, r, w = testing_utils.RedirectStdout()
 
-	DisplayOneRollAction(D20)
+	ExecuteAndDisplayOneRollAction(D20)
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQb(t, false, output != ErrUnsupportedDiceType)
 }

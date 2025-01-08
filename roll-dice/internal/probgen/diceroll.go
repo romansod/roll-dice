@@ -117,21 +117,36 @@ func (diceRoll DiceRoll) execute() error {
 //
 //	Params
 //		nSides int : indicate the number of sides for the dice
-func DisplayOneRollAction(nSides int) {
-	pe := ProbEvent{
-		numEvents: 1,
-		outcomes:  possibleDiceValues(nSides),
-		prng:      randNumGen}
-
-	res := pe.getProbValue()
+//	Returns
+//		int : result of dice roll
+func ExecuteAndDisplayOneRollAction(nSides int) int {
+	res := ExecuteOneRollAction(nSides)
 
 	// Only support D6 for now
 	switch nSides {
 	case D6:
 		fmt.Print(d6Visuals[res])
+		res_i, _ := strconv.Atoi(res)
+		return res_i
 	default:
 		fmt.Print(ErrUnsupportedDiceType)
+		return -1
 	}
+}
+
+// One dice roll action
+//
+//	Params
+//		nSides int : number of sides for the die
+//	Returns
+//		string : dice value "1" -> nSides
+func ExecuteOneRollAction(nSides int) string {
+	pe := ProbEvent{
+		numEvents: 1,
+		outcomes:  possibleDiceValues(nSides),
+		prng:      randNumGen}
+
+	return pe.getProbValue()
 }
 
 // Print the dice roll results. Example:

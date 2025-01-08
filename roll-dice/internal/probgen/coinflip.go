@@ -8,6 +8,7 @@ package probgen
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Potential values
@@ -67,7 +68,22 @@ func (coinFlip CoinFlip) execute() error {
 
 // Exposed endpoint to execute one coin flip and
 // print out a visual of the result
-func DisplayOneFlipAction() {
+//
+//	Returns
+//		int : coin flip result
+func DisplayOneFlipAction() int {
+	res := ExecuteOneFlipAction()
+
+	fmt.Print(coinVisuals[res])
+	res_i, _ := strconv.Atoi(res)
+	return res_i
+}
+
+// One coin flip action
+//
+//	Returns
+//		string : coin flip value "Heads" or "Tails"
+func ExecuteOneFlipAction() string {
 	pe := ProbEvent{
 		numEvents: 1,
 		outcomes: []string{
@@ -75,9 +91,7 @@ func DisplayOneFlipAction() {
 			Tails},
 		prng: randNumGen}
 
-	res := pe.getProbValue()
-
-	fmt.Print(coinVisuals[res])
+	return pe.getProbValue()
 }
 
 // Print the coin flip results. Example:
