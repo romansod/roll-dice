@@ -236,7 +236,11 @@ func TestUpdateGameState(t *testing.T) {
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
 	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][_][_][_][_]", output)
+
+	// (+) Check the win condition
+	origStdout, ignoreOut := testing_utils.IgnoreStdout()
 	testing_utils.AssertEQb(t, true, stb.checkWinCondition())
+	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)
 }
 
 func TestTargetSumExists(t *testing.T) {

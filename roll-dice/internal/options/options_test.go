@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/romansod/roll-dice/internal/testing_utils"
+	"github.com/romansod/roll-dice/internal/utilities"
 )
 
 // Initialize Options and registers them for use during tests
@@ -46,18 +47,38 @@ func TestProcessInput(t *testing.T) {
 	expected := ""
 	var stdin bytes.Buffer
 
+	// Pass : Done
+	stdin.Write([]byte("\n"))
+	done, _, err := utilities.ProcessInputInt(&stdin)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQb(t, true, done)
+	stdin.Reset()
+
 	// Err : non-numeric
 	stdin.Write([]byte("invalid"))
 	expected = "strconv.Atoi: parsing \"invalid\": invalid syntax"
-	_, _, err := processInputInt(&stdin)
+	_, _, err = utilities.ProcessInputInt(&stdin)
 	testing_utils.AssertEQ(t, expected, err.Error())
 	stdin.Reset()
 
 	// Pass : unsupported
 	stdin.Write([]byte("-1"))
-	_, input, err := processInputInt(&stdin)
+	_, input, err := utilities.ProcessInputInt(&stdin)
 	testing_utils.AssertNIL(t, err)
 	testing_utils.AssertEQi(t, -1, input)
+	stdin.Reset()
+
+	// Pass : Done
+	stdin.Write([]byte("\n"))
+	done, _ = utilities.ProcessInputStr(&stdin)
+	testing_utils.AssertNIL(t, err)
+	testing_utils.AssertEQb(t, true, done)
+	stdin.Reset()
+
+	// Pass : string
+	stdin.Write([]byte("playername"))
+	_, input_s := utilities.ProcessInputStr(&stdin)
+	testing_utils.AssertEQ(t, "playername", input_s)
 	stdin.Reset()
 
 	testing_utils.IgnoreStdoutClose(origStdout, ignoreOut)

@@ -8,9 +8,11 @@ package games
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/romansod/roll-dice/internal/probgen"
+	"github.com/romansod/roll-dice/internal/utilities"
 )
 
 /// Errors
@@ -68,23 +70,28 @@ func (shutTheBox *ShutTheBox) nextTurn() {
 }
 
 // TODO still need to finish this function
-func (shutTheBox ShutTheBox) Run() {
+func (shutTheBox ShutTheBox) Run() bool {
 	game_done := false
 	for !game_done {
 
 		shutTheBox.printGameState()
 
 		if shutTheBox.checkWinCondition() {
-			// Congradulate
-			// Prompt to keep playing
-			// Exit
-			// Keep going
+			// Winner! Prompt to keep playing
+			if !continuePlaying() {
+				// Terminal State
+				break
+			}
+
+			// Keep playing, start with the next player
 			shutTheBox.nextTurn()
 			continue
 		}
 
+		// Roll for the player
 		roll1 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
 		roll2 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
+		// Compute the target
 		target := roll1 + roll2
 
 		if !shutTheBox.checkSolutionExists(target) {
@@ -97,20 +104,27 @@ func (shutTheBox ShutTheBox) Run() {
 		action_done := false
 		for !game_done && !action_done {
 			fmt.Printf("Target sum is '%d' . Please enter open slots together:\n", target)
-			// Get input
-			input_slots := "123"
-			// Get ProcessInputInt
-			// Check if done
+			game_done, input_slots := utilities.ProcessInputStr(os.Stdin)
+
+			// User is done and wants to quit
+			if game_done {
+				// Exit this loop and then the outer loop
+				break
+			}
+
+			// Try to update the game state
 			err := shutTheBox.updateGameState(input_slots, target)
 			if err != nil {
-				// Error feedback
+				// Error feedback, retry
 				fmt.Print(err.Error())
 			} else {
-				// Update succeeded
-				action_done = true
+				// Update succeeded. Return to outer loop
+				break
 			}
 		}
 	}
+
+	return true
 }
 
 // Update the current game state with the provided arguments, unless an error
@@ -146,10 +160,19 @@ func (shutTheBox ShutTheBox) printGameState() {
 
 // Check the win condition: box is shut
 //
+// When player wins, congradulate them
+//
 //	Returns
 //		bool : true if box is totally shut, false otherwise
 func (shutTheBox ShutTheBox) checkWinCondition() bool {
-	return IsBoxEmpty(shutTheBox.gameState)
+	if IsBoxEmpty(shutTheBox.gameState) {
+		fmt.Printf(
+			"%s, you have won!\n\n>>>> !!! Congradulations !!! <<<<\n",
+			shutTheBox.players[shutTheBox.player_i])
+		return true
+	}
+
+	return false
 }
 
 // Check whether a solution exists
@@ -161,7 +184,14 @@ func (shutTheBox ShutTheBox) checkWinCondition() bool {
 //		to satisfy the target
 func (shutTheBox ShutTheBox) checkSolutionExists(target int) bool {
 	gstate := shutTheBox.gameState
-	return TargetSumExists(&gstate, target)
+	if !TargetSumExists(&gstate, target) {
+		fmt.Printf(
+			"Sorry %s, there is no possible solution. Next players turn\n",
+			shutTheBox.players[shutTheBox.player_i])
+		return false
+	}
+
+	return true
 }
 
 // Verify the proposed update, apply slot by slot to the game state
@@ -382,4 +412,38 @@ func TargetSumExists(bitset *int, target int) bool {
 //		bool : true if all slots in box are shut
 func IsBoxEmpty(gstate int) bool {
 	return gstate == ShutBox
+}
+
+// Prompt whether user wants to keep playing or not. Will handle
+// errors and invalid inputs and prompt for input again and exit
+// when user indicates they are done
+//
+//	Returns
+//		bool : true if user wants to continue
+func continuePlaying() bool {
+	var done bool
+	for !done {
+		fmt.Print("Would you like to keep playing? [y/n]\n")
+		done, input := utilities.ProcessInputStr(os.Stdin)
+
+		// Inform caller we are done
+		if done {
+			return false
+		}
+
+		// Inform caller to continue
+		if input == "y" {
+			return true
+		}
+
+		// Inform caller we are done
+		if input == "n" {
+			return false
+		}
+
+		fmt.Printf("input error: expected 'y' or 'n'\n")
+	}
+
+	// We should not ever reach this line
+	return false
 }
