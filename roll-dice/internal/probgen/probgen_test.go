@@ -109,27 +109,27 @@ func TestGetProbValue(t *testing.T) {
 		prng:      PRNG_for_testing}
 
 	// 0 -> heads
-	expected, actual := Heads, pe.getProbValue()
+	expected, actual := Heads, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 3 -> tails
-	expected, actual = Tails, pe.getProbValue()
+	expected, actual = Tails, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 5 -> tails
-	expected, actual = Tails, pe.getProbValue()
+	expected, actual = Tails, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 22 -> heads
-	expected, actual = Heads, pe.getProbValue()
+	expected, actual = Heads, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 7 -> tails
-	expected, actual = Tails, pe.getProbValue()
+	expected, actual = Tails, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 
 	// 4 -> heads
-	expected, actual = Heads, pe.getProbValue()
+	expected, actual = Heads, pe.getProbOutcome(pe.getProbValue())
 	testing_utils.AssertEQ(t, expected, actual)
 }
 

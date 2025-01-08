@@ -36,34 +36,57 @@ var dicePossibleValues = []string{
 	"13", "14", "15", "16", "17", "18", "19", "20", // -> D20
 }
 
+const (
+	r1  = iota // 0
+	r2         // 1
+	r3         // 2
+	r4         // 3
+	r5         // 4
+	r6         // 5
+	r7         // 6
+	r8         // 7
+	r9         // 8
+	r10        // 9
+	r11        // 10
+	r12        // 11
+	r13        // 12
+	r14        // 13
+	r15        // 14
+	r16        // 15
+	r17        // 16
+	r18        // 17
+	r19        // 18
+	r20        // 19
+)
+
 // All visual representations of 6 sided dice
-var d6Visuals = map[string]string{
-	dicePossibleValues[0]: " -------\n" +
+var d6Visuals = map[int]string{
+	r1: " -------\n" +
 		"|       |\n" +
 		"|   o   |\n" +
 		"|       |\n" +
 		" -------\n",
-	dicePossibleValues[1]: " -------\n" +
+	r2: " -------\n" +
 		"| o     |\n" +
 		"|       |\n" +
 		"|     o |\n" +
 		" -------\n",
-	dicePossibleValues[2]: " -------\n" +
+	r3: " -------\n" +
 		"| o     |\n" +
 		"|   o   |\n" +
 		"|     o |\n" +
 		" -------\n",
-	dicePossibleValues[3]: " -------\n" +
+	r4: " -------\n" +
 		"| o   o |\n" +
 		"|       |\n" +
 		"| o   o |\n" +
 		" -------\n",
-	dicePossibleValues[4]: " -------\n" +
+	r5: " -------\n" +
 		"| o   o |\n" +
 		"|   o   |\n" +
 		"| o   o |\n" +
 		" -------\n",
-	dicePossibleValues[5]: " -------\n" +
+	r6: " -------\n" +
 		"| o   o |\n" +
 		"| o   o |\n" +
 		"| o   o |\n" +
@@ -126,8 +149,7 @@ func ExecuteAndDisplayOneRollAction(nSides int) int {
 	switch nSides {
 	case D6:
 		fmt.Print(d6Visuals[res])
-		res_i, _ := strconv.Atoi(res)
-		return res_i
+		return res
 	default:
 		fmt.Print(ErrUnsupportedDiceType)
 		return -1
@@ -139,8 +161,8 @@ func ExecuteAndDisplayOneRollAction(nSides int) int {
 //	Params
 //		nSides int : number of sides for the die
 //	Returns
-//		string : dice value "1" -> nSides
-func ExecuteOneRollAction(nSides int) string {
+//		int : dice value 0 -> nSides - 1
+func ExecuteOneRollAction(nSides int) int {
 	pe := ProbEvent{
 		numEvents: 1,
 		outcomes:  possibleDiceValues(nSides),
