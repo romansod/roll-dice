@@ -41,6 +41,7 @@ func ProcessInputStr(stdin io.Reader) (bool, string) {
 	scanner.Scan()
 	if scanner.Text() == "" {
 		// User is done providing inputs
+		fmt.Print("Stopping current operation\n")
 		return true, ""
 	}
 	// Add extra space after input to avoid clutter

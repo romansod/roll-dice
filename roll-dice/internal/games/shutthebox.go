@@ -69,10 +69,10 @@ func (shutTheBox *ShutTheBox) nextTurn() {
 	shutTheBox.nextPlayer()
 }
 
-// TODO still need to finish this function
-func (shutTheBox ShutTheBox) Run() bool {
-	game_done := false
-	for !game_done {
+// Main driver for playing Shut the Box game. Handles turns and playing after
+// winning or losing
+func (shutTheBox ShutTheBox) Run() {
+	for {
 
 		shutTheBox.printGameState()
 
@@ -80,7 +80,7 @@ func (shutTheBox ShutTheBox) Run() bool {
 			// Winner! Prompt to keep playing
 			if !continuePlaying() {
 				// Terminal State
-				break
+				return
 			}
 
 			// Keep playing, start with the next player
@@ -89,8 +89,8 @@ func (shutTheBox ShutTheBox) Run() bool {
 		}
 
 		// Roll for the player
-		roll1 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
-		roll2 := probgen.ExecuteAndDisplayOneRollAction(probgen.D6)
+		roll1 := GetSlotValue(probgen.ExecuteAndDisplayOneRollAction(probgen.D6))
+		roll2 := GetSlotValue(probgen.ExecuteAndDisplayOneRollAction(probgen.D6))
 		// Compute the target
 		target := roll1 + roll2
 
@@ -101,30 +101,28 @@ func (shutTheBox ShutTheBox) Run() bool {
 		}
 
 		// Player Action
-		action_done := false
-		for !game_done && !action_done {
-			fmt.Printf("Target sum is '%d' . Please enter open slots together:\n", target)
+		for {
+			fmt.Printf("\nTarget sum is '%d' . Please enter open slots together:\n", target)
 			game_done, input_slots := utilities.ProcessInputStr(os.Stdin)
 
 			// User is done and wants to quit
 			if game_done {
-				// Exit this loop and then the outer loop
-				break
+				// Exit the driver and return to the menu
+				return
 			}
 
-			// Try to update the game state
+			// Try to update the game state, or do nothing and try next iter
 			err := shutTheBox.updateGameState(input_slots, target)
 			if err != nil {
 				// Error feedback, retry
 				fmt.Print(err.Error())
+				shutTheBox.printGameState()
 			} else {
 				// Update succeeded. Return to outer loop
 				break
 			}
 		}
 	}
-
-	return true
 }
 
 // Update the current game state with the provided arguments, unless an error
@@ -153,7 +151,7 @@ func (shutTheBox *ShutTheBox) updateGameState(update string, target int) error {
 // [_][2][3][_][5][6][_][8][9]
 func (shutTheBox ShutTheBox) printGameState() {
 	fmt.Printf(
-		"Player: %s\n\n%s",
+		"\n\nPlayer: %s\n\n%s\n",
 		shutTheBox.players[shutTheBox.player_i],
 		AssembleSlotsToDisplay(shutTheBox.gameState))
 }
@@ -167,7 +165,7 @@ func (shutTheBox ShutTheBox) printGameState() {
 func (shutTheBox ShutTheBox) checkWinCondition() bool {
 	if IsBoxEmpty(shutTheBox.gameState) {
 		fmt.Printf(
-			"%s, you have won!\n\n>>>> !!! Congradulations !!! <<<<\n",
+			"\n\n%s, you have won!\n\n>>>> !!! Congradulations !!! <<<<\n",
 			shutTheBox.players[shutTheBox.player_i])
 		return true
 	}
@@ -186,7 +184,7 @@ func (shutTheBox ShutTheBox) checkSolutionExists(target int) bool {
 	gstate := shutTheBox.gameState
 	if !TargetSumExists(&gstate, target) {
 		fmt.Printf(
-			"Sorry %s, there is no possible solution. Next players turn\n",
+			"\nSorry %s, there is no possible solution. Next players turn\n\n",
 			shutTheBox.players[shutTheBox.player_i])
 		return false
 	}
@@ -223,8 +221,17 @@ func processProposedUpdate(gstate int, update string, target int) (int, error) {
 			return -1, errors.New(ErrInvDigit)
 		}
 
+		// This will handle duplicated inputs and already closed slots
+		// ex: 22 = 4 or [_][2]... -> 12 = 3
+		digit_slot := GetValueSlot(digit_i)
+		if !IsBitSet(gstate, digit_slot) {
+			return -1, fmt.Errorf(
+				"slot %d is already closed. Please try again",
+				digit_i)
+		}
+
 		combinedDigits += digit_i
-		SetBitEmpty(&gstate, GetValueSlot(digit_i))
+		SetBitEmpty(&gstate, digit_slot)
 	}
 
 	// Verify whether the inputs actually add up to the target

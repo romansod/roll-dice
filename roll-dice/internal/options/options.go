@@ -32,6 +32,7 @@ const (
 	exit       = iota
 	flip_coins = iota
 	roll_dice  = iota
+	shutthebox = iota
 )
 
 /// Collection of Options
@@ -58,6 +59,7 @@ func (options *Options) registerOptions() {
 	options.opts[exit] = OptExit{name: "Exit", optNum: exit}
 	options.opts[flip_coins] = OptFlipCoins{name: "Flip Coins", optNum: flip_coins}
 	options.opts[roll_dice] = OptRollDice{name: "Roll Dice", optNum: roll_dice}
+	options.opts[shutthebox] = OptShutTheBox{name: "Shut the Box", optNum: shutthebox}
 }
 
 // Run the given Opt based on the opt number provided
@@ -256,7 +258,7 @@ func getPlayers(stdin io.Reader) (bool, []string, error) {
 			return true, nil, nil
 		}
 
-		players = append(players, player)
+		players[i] = player
 	}
 
 	return false, players, nil
