@@ -171,7 +171,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb := NewShutBox([]string{"p1"})
 	stb.printGameState()
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of single slot
@@ -179,7 +179,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("4", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][_][5][6][7][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (-) No op when given an update that is not valid
@@ -187,7 +187,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("adg", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][_][5][6][7][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (-) No op when given an update that does not satisfy the target
@@ -195,7 +195,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("178", 4)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][_][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][_][5][6][7][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of composite solution with two slots
@@ -203,7 +203,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("17", 8)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][2][3][_][5][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][2][3][_][5][6][_][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of composite solution with three slots
@@ -211,7 +211,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("235", 10)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][_][_][_][_][6][_][8][9]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of the last slot
@@ -219,7 +219,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("9", 9)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][8][_]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][_][_][_][_][6][_][8][_]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of internal isolated slot
@@ -227,7 +227,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("8", 8)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][6][_][_][_]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][_][_][_][_][6][_][_][_]\n", output)
 	testing_utils.AssertEQb(t, false, stb.checkWinCondition())
 
 	// (+) Successful update of the final open slot to close the box and win
@@ -235,7 +235,7 @@ func TestUpdateGameState(t *testing.T) {
 	stb.updateGameState("6", 6)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][_][_][_][_][_][_][_][_]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][_][_][_][_][_][_][_][_]\n", output)
 
 	// (+) Check the win condition
 	origStdout, ignoreOut := testing_utils.IgnoreStdout()
@@ -457,7 +457,7 @@ func TestNextTurn(t *testing.T) {
 	stb := NewShutBox([]string{"p1", "p2", "p3", "p4"})
 	stb.printGameState()
 	output := testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// nextPlayer tests
 
@@ -466,28 +466,28 @@ func TestNextTurn(t *testing.T) {
 	stb.nextPlayer()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p2\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p2\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// Increment the player p2 -> p3
 	origStdout, r, w = testing_utils.RedirectStdout()
 	stb.nextPlayer()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p3\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p3\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// Increment the player p3 -> p4
 	origStdout, r, w = testing_utils.RedirectStdout()
 	stb.nextPlayer()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p4\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p4\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// Increment the player p4 -> p1 LOOP BACK
 	origStdout, r, w = testing_utils.RedirectStdout()
 	stb.nextPlayer()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// resetBox tests
 
@@ -496,7 +496,7 @@ func TestNextTurn(t *testing.T) {
 	stb.updateGameState("147", 12)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[_][2][3][_][5][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[_][2][3][_][5][6][_][8][9]\n", output)
 
 	// Increment the player p1 -> p2
 	// Reset the box
@@ -505,14 +505,14 @@ func TestNextTurn(t *testing.T) {
 	stb.resetBox()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p2\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p2\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// Close some slots
 	origStdout, r, w = testing_utils.RedirectStdout()
 	stb.updateGameState("147", 12)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p2\n\n[_][2][3][_][5][6][_][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p2\n\n[_][2][3][_][5][6][_][8][9]\n", output)
 
 	// Increment the player p1 -> p2
 	// Reset the box
@@ -520,7 +520,7 @@ func TestNextTurn(t *testing.T) {
 	stb.nextTurn()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p3\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p3\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 
 	// Change player to p4 to test loop around
 	stb.nextPlayer()
@@ -529,7 +529,7 @@ func TestNextTurn(t *testing.T) {
 	stb.updateGameState("26", 8)
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p4\n\n[1][_][3][4][5][_][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p4\n\n[1][_][3][4][5][_][7][8][9]\n", output)
 
 	// Increment the player p4 -> p1 LOOP BACK
 	// Reset the box
@@ -537,5 +537,5 @@ func TestNextTurn(t *testing.T) {
 	stb.nextTurn()
 	stb.printGameState()
 	output = testing_utils.CaptureAndRestoreOutput(r, w, origStdout)
-	testing_utils.AssertEQ(t, "Player: p1\n\n[1][2][3][4][5][6][7][8][9]", output)
+	testing_utils.AssertEQ(t, "\n\nPlayer: p1\n\n[1][2][3][4][5][6][7][8][9]\n", output)
 }

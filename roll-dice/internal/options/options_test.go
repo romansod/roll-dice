@@ -35,7 +35,8 @@ func TestDisplay(t *testing.T) {
 			"\n\nRegistered Options:\n" +
 			"\n\t0) Exit" +
 			"\n\t1) Flip Coins" +
-			"\n\t2) Roll Dice\n"
+			"\n\t2) Roll Dice" +
+			"\n\t3) Shut the Box\n"
 	testing_utils.AssertEQ(t, expected, output)
 }
 
